@@ -43,7 +43,8 @@
             
             <div class="mb-4">
                 <label for="clubNameInput" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Club</label>
-                <input type="text" id="clubNameInput" class="w-full p-3 border rounded-lg focus:ring-2 rojo-border focus:border-rojo-brillante" placeholder="Ej: Águilas de Voleibol">
+                <!-- Placeholder actualizado a los nuevos nombres -->
+                <input type="text" id="clubNameInput" class="w-full p-3 border rounded-lg focus:ring-2 rojo-border focus:border-rojo-brillante" placeholder="Ej: Angeles">
             </div>
             
             <div class="mb-6">
@@ -57,14 +58,14 @@
                 Iniciar Sesión
             </button>
 
-            <!-- Claves de Ejemplo para Pruebas -->
+            <!-- Claves de Ejemplo ACTUALIZADAS para Pruebas -->
             <div class="mt-8 p-4 bg-red-50 rounded-lg text-xs text-gray-600">
                 <p class="font-bold mb-2 text-red-800">CLAVES DE ACCESO DE PRUEBA</p>
                 <p class="mb-2">Los datos que registres SÍ se guardarán en tu base de datos (Firestore) bajo el ID de tu club.</p>
                 <ul class="list-disc list-inside space-y-1">
-                    <li>**Águilas de Voleibol:** Clave `aguilas2025`</li>
-                    <li>**Pumas de Voleibol:** Clave `pumas2025`</li>
-                    <li>**Estrellas de Voleibol:** Clave `estrellas2025`</li>
+                    <li>**Angeles:** Clave `aguilas2025`</li>
+                    <li>**Pumas:** Clave `pumas2025`</li>
+                    <li>**Estrellas:** Clave `estrellas2025`</li>
                 </ul>
             </div>
         </div>
@@ -194,20 +195,19 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
         // CONFIGURACIÓN DE FIREBASE (PROYECTO: datacontrolvoley-ff556)
+        // Usamos la configuración proporcionada por el usuario o la inyectada por el entorno
         let firebaseConfig = {
             apiKey: "AIzaSyB5RB7mm1j-0gjCNTUEJTkyEqLjyZ3C7ws",
             authDomain: "datacontrolvoley-ff556.firebaseapp.com",
             projectId: "datacontrolvoley-ff556",
             storageBucket: "datacontrolvoley-ff556.firebasestorage.app",
             messagingSenderId: "516409072606",
-            appId: "1:516409072606:web:132538dba358a077d71b4f" // Usando el ID proporcionado
+            appId: "1:516409072606:web:132538dba358a077d71b4f" 
         };
         
-        // El entorno de Canvas inyecta la configuración, pero usamos la tuya como fallback/referencia
         try {
             if (typeof __firebase_config !== 'undefined') {
                 const injectedConfig = JSON.parse(__firebase_config);
-                // Si la configuración inyectada es válida, la usamos
                 if (injectedConfig && injectedConfig.apiKey) {
                     firebaseConfig = injectedConfig;
                 }
@@ -226,11 +226,11 @@
         const saveButton = document.getElementById('saveButton');
         const connectionStatusElement = document.getElementById('connectionStatus');
 
-        // Simulación de Claves de Club
+        // Simulación de Claves de Club ACTUALIZADAS
         const clubCredentials = {
-            'Águilas de Voleibol': 'aguilas2025',
-            'Pumas de Voleibol': 'pumas2025',
-            'Estrellas de Voleibol': 'estrellas2025'
+            'Angeles': 'aguilas2025',
+            'Pumas': 'pumas2025',
+            'Estrellas': 'estrellas2025'
         };
         
         // --- Funciones de Utilidad ---
