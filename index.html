@@ -184,7 +184,7 @@
     <script type="module">
         // Importaciones de Firebase SDK (v11.6.1)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, addDoc, onSnapshot, collection, query, where, deleteDoc, setLogLevel, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Establecer nivel de log para depuración de Firestore
@@ -192,7 +192,6 @@
 
         // --- Configuración de Firebase y Variables Globales ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
         let firebaseConfig = {};
         try {
@@ -223,7 +222,6 @@
 
         /**
          * Actualiza el estado del botón Guardar y el mensaje de conexión.
-         * Esta función ha sido mejorada para detectar fallos de autenticación.
          */
         function updateSaveButtonState() {
             if (!currentClubId) {
@@ -244,9 +242,9 @@
             } else {
                 // Estado 3: Autenticación Fallida (userId es null, pero ya se completó el chequeo)
                 saveButton.disabled = true;
-                connectionStatusElement.textContent = 'ERROR: Autenticación fallida. No se puede escribir en Firestore.';
+                connectionStatusElement.textContent = 'ERROR: Autenticación fallida. Verifique las Reglas de Seguridad y Auth Anónimo en Firebase.';
                 connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-red-600';
-                console.error("Autenticación fallida o userId es null. Verifique las reglas de seguridad de Firestore.");
+                console.error("Autenticación fallida: userId es null. Es un problema de configuración de Firebase (Reglas/Auth Anónimo).");
             }
         }
 
@@ -301,9 +299,9 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
 
-                // Configurar el listener de estado ANTES del intento de sign-in (Mejor Práctica)
+                // Configurar el listener de estado ANTES del intento de sign-in
                 onAuthStateChanged(auth, (user) => {
-                    isAuthReady = true; // Se establece a TRUE en el momento que Firebase reporta el estado inicial (éxito o fallo)
+                    isAuthReady = true; // Se establece a TRUE cuando Firebase reporta el estado inicial (éxito o fallo)
                     if (user) {
                         userId = user.uid;
                         authStatusElement.textContent = 'Conectado';
@@ -312,22 +310,22 @@
                     } else {
                         userId = null;
                         authStatusElement.textContent = 'Anónimo/Desconectado';
-                        console.log("Sesión anónima/no autenticada.");
+                        console.log("Sesión anónima/no autenticada. UserID es null.");
                     }
                     
                     updateSaveButtonState(); // Habilitar/deshabilitar botón con el estado final
                     
-                    if (currentClubId) {
-                        loadAthletes(); // Cargar datos si el club ya está seleccionado y la autenticación terminó
+                    if (currentClubId && isAuthReady && userId) {
+                        loadAthletes(); // Cargar datos si el club ya está seleccionado y la autenticación terminó con éxito
+                    } else if (currentClubId && isAuthReady && !userId) {
+                         // Mostrar mensaje de error si el club está seleccionado pero la auth falló
+                         document.getElementById('loadingMessage').textContent = 'Fallo al autenticar. Por favor, verifique las Reglas de Seguridad y Auth Anónimo.';
                     }
                 });
 
-                // Intento de autenticación usando el token o anónimamente
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
+                // Intento de autenticación anónima (usamos directamente signInAnonymously)
+                // Esto reemplaza el uso de __initial_auth_token
+                await signInAnonymously(auth);
                 
                 // Nota: El estado final de isAuthReady se gestiona en onAuthStateChanged
 
@@ -336,7 +334,7 @@
                 authStatusElement.textContent = 'ERROR Crítico';
                 document.getElementById('loadingMessage').textContent = `Error CRÍTICO de Firebase: ${error.code || error.message}. Revise la consola.`;
                 isAuthReady = true;
-                userId = null; // Forzar a null si la autenticación falla por error crítico
+                userId = null; 
                 updateSaveButtonState();
             }
         }
@@ -362,9 +360,12 @@
                 
                 updateSaveButtonState(); // Actualizar estado de conexión/guardado
                 
-                // Cargar datos si Firebase ya está listo (isAuthReady), si no, se cargarán al terminar onAuthStateChanged
-                if (isAuthReady && db) {
+                // Cargar datos si Firebase ya está listo Y autenticado, si no, se cargarán al terminar onAuthStateChanged
+                if (isAuthReady && db && userId) {
                     loadAthletes();
+                } else if (isAuthReady && !userId) {
+                    // Si ya se autenticó pero falló (userId=null), muestro el error
+                    document.getElementById('loadingMessage').textContent = 'Error de autenticación. Verifique las Reglas de Seguridad.';
                 } else {
                     document.getElementById('loadingMessage').textContent = 'Esperando a la autenticación de Firebase para cargar los datos...';
                 }
@@ -397,9 +398,8 @@
         window.saveAthlete = async function(event) {
             event.preventDefault();
             
-            // Guardia de conexión principal mejorada: solo permite guardar si hay club, DB, usuario y no está guardando
+            // Guardia de conexión principal mejorada
             if (isSaving || saveButton.disabled || !currentClubId || !db || !userId) {
-                // Mostrar el mismo error de la UI en el mensaje de guardado si el botón estaba deshabilitado
                 document.getElementById('saveMessage').textContent = connectionStatusElement.textContent;
                 document.getElementById('saveMessage').classList.remove('hidden', 'success');
                 document.getElementById('saveMessage').classList.add('error');
