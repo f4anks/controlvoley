@@ -40,7 +40,7 @@
             
             <div class="mb-4">
                 <label for="clubNameInput" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Club</label>
-                <input type="text" id="clubNameInput" class="w-full p-3 border rounded-lg focus:ring-2 rojo-border focus:border-rojo-brillante" placeholder="Ej: bertha">
+                <input type="text" id="clubNameInput" class="w-full p-3 border rounded-lg focus:ring-2 rojo-border focus:border-rojo-brillante" placeholder="Ej: Águilas de Voleibol">
             </div>
             
             <div class="mb-6">
@@ -50,7 +50,7 @@
 
             <div id="loginMessage" class="text-sm text-red-600 mb-4 text-center hidden"></div>
 
-            <button onclick="handleLogin()" class="w-full py-3 vinotinto-bg text-white font-semibold rounded-lg vinotinto-hover transition duration-200">
+            <button onclick="handleLogin()" id="loginButton" class="w-full py-3 vinotinto-bg text-white font-semibold rounded-lg vinotinto-hover transition duration-200">
                 Iniciar Sesión
             </button>
 
@@ -58,9 +58,9 @@
             <div class="mt-8 p-4 bg-gray-50 rounded-lg text-xs text-gray-600">
                 <p class="font-bold mb-2">Claves de Prueba (Simulación):</p>
                 <ul class="list-disc list-inside space-y-1">
-                    <li>**bertha:** Clave `bertha2025`</li>
-                    <li>**Pumas:** Clave `pumas2025`</li>
-                    <li>**Estrellas:** Clave `estrellas2025`</li>
+                    <li>**Águilas de Voleibol:** Clave `aguilas2025`</li>
+                    <li>**Pumas de Voleibol:** Clave `pumas2025`</li>
+                    <li>**Estrellas de Voleibol:** Clave `estrellas2025`</li>
                 </ul>
             </div>
         </div>
@@ -131,7 +131,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full mt-6 py-3 vinotinto-bg text-white font-semibold rounded-lg vinotinto-hover transition duration-200">
+                    <button type="submit" id="saveButton" class="w-full mt-6 py-3 vinotinto-bg text-white font-semibold rounded-lg vinotinto-hover transition duration-200">
                         Guardar Atleta y Nómina
                     </button>
                     <div id="saveMessage" class="text-center mt-3 text-sm hidden"></div>
@@ -176,15 +176,36 @@
         // --- Configuración de Firebase y Variables Globales ---
         // Variables globales proporcionadas por el entorno (MANDATORIO)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
+        // Configuración del usuario como fallback si el entorno no la proporciona
+        const userFirebaseConfig = {
+            apiKey: "AIzaSyAY969o0Q8owhHq-UBylXI_LLMz6znuuus",
+            authDomain: "datacontrolvoley.firebaseapp.com",
+            projectId: "datacontrolvoley",
+            storageBucket: "datacontrolvoley.firebasestorage.app",
+            messagingSenderId: "143088489286",
+            appId: "1:143088489286:web:09f9d26d7b698ee5cf0b47"
+        };
+        
+        // Determinar la configuración a usar
+        let firebaseConfig;
+        try {
+            firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+            if (Object.keys(firebaseConfig).length === 0) {
+                console.warn("ADVERTENCIA: __firebase_config del entorno está vacío. Usando configuración proporcionada por el usuario como fallback.");
+                firebaseConfig = userFirebaseConfig;
+            }
+        } catch (e) {
+            console.error("ERROR al parsear __firebase_config. Usando configuración proporcionada por el usuario como fallback.", e);
+            firebaseConfig = userFirebaseConfig;
+        }
+
         // Inicialización de Firebase
         let app, db, auth;
         let userId = null;
         let isAuthReady = false;
-
-        // Variables de la Aplicación
+        let isSaving = false; // Estado para prevenir doble envío
         let currentClubId = null;
 
         // Simulación de Claves de Club (Debe ser manejado por Firebase Auth en producción)
@@ -199,22 +220,12 @@
         // Función de Autenticación
         async function setupFirebase() {
             try {
-                if (Object.keys(firebaseConfig).length === 0) {
-                    console.error("ERROR: firebaseConfig no está disponible. Usando configuración por defecto.");
-                    // Si el entorno no proporciona la configuración, usamos la que el usuario indicó (solo para emergencia)
-                    const userConfig = {
-                        apiKey: "AIzaSyAY969o0Q8owhHq-UBylXI_LLMz6znuuus",
-                        authDomain: "datacontrolvoley.firebaseapp.com",
-                        projectId: "datacontrolvoley",
-                        storageBucket: "datacontrolvoley.firebasestorage.app",
-                        messagingSenderId: "143088489286",
-                        appId: "1:143088489286:web:09f9d26d7b698ee5cf0b47"
-                    };
-                    app = initializeApp(userConfig);
-                } else {
-                    app = initializeApp(firebaseConfig);
+                if (!firebaseConfig || !firebaseConfig.projectId) {
+                     console.error("Error: firebaseConfig es inválido o no tiene projectId. No se puede inicializar Firebase.");
+                     return;
                 }
                 
+                app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
 
@@ -230,13 +241,13 @@
                         userId = user.uid;
                         isAuthReady = true;
                         console.log("Firebase Auth listo. UserID:", userId);
-                        // Si el club ya está logeado (e.g. después de un refresh simulado), cargar datos
+                        // Si el club ya está logeado, cargar datos
                         if (currentClubId) {
                             loadAthletes();
                         }
                     } else {
-                        isAuthReady = true;
-                        console.log("Sesión anónima iniciada.");
+                        isAuthReady = true; // Auth ha terminado de verificar, aunque no haya usuario.
+                        console.log("Sesión anónima/no autenticada.");
                     }
                 });
 
@@ -255,22 +266,32 @@
             const loginMessage = document.getElementById('loginMessage');
             
             loginMessage.classList.add('hidden');
+            document.getElementById('loginButton').disabled = true;
+            document.getElementById('loginButton').textContent = 'Verificando...';
 
+
+            // Simulación de validación
             if (clubCredentials[clubName] === clubKey) {
                 currentClubId = clubName;
                 document.getElementById('currentClubDisplay').textContent = clubName;
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
                 
-                // Cargar datos del club recién autenticado
+                // Cargar datos si la autenticación ya está lista
                 if (isAuthReady) {
                     loadAthletes();
+                } else {
+                    // Si Auth no está lista, loadAthletes se llamará en onAuthStateChanged
+                    document.getElementById('loadingMessage').textContent = 'Esperando conexión con Firebase...';
                 }
 
             } else {
                 loginMessage.textContent = 'Nombre del club o clave incorrecta.';
                 loginMessage.classList.remove('hidden');
             }
+
+            document.getElementById('loginButton').disabled = false;
+            document.getElementById('loginButton').textContent = 'Iniciar Sesión';
         }
 
         window.logout = function() {
@@ -287,8 +308,7 @@
 
         // Referencia a la colección pública, filtrada por app id
         const getAthletesCollection = () => {
-             // La colección debe ser pública para ser compartida por todos los usuarios/clubes,
-             // pero la filtramos por 'clubId' para la segregación de datos.
+             // Colección pública (para compartir datos entre usuarios/clubes en la plataforma)
              const path = `artifacts/${appId}/public/data/athletes`;
              return collection(db, path);
         };
@@ -296,10 +316,25 @@
         window.saveAthlete = async function(event) {
             event.preventDefault();
 
+            if (isSaving) {
+                alertUser('Guardando datos, por favor espera...', 'error');
+                return;
+            }
+
+            // **VERIFICACIÓN CRÍTICA PARA ASINCRONÍA: Asegura que Firebase y Auth estén listos**
+            if (!isAuthReady || !db) {
+                alertUser('Error de inicialización: Firebase no está listo. Intenta de nuevo en un momento.', 'error');
+                console.error("Firebase o Autenticación no está lista para la escritura.");
+                return;
+            }
             if (!currentClubId) {
                 alertUser('Error: Club no autenticado. Por favor, inicia sesión.', 'error');
                 return;
             }
+
+            isSaving = true;
+            document.getElementById('saveButton').textContent = 'Guardando...';
+            document.getElementById('saveButton').disabled = true;
 
             try {
                 const nombre = document.getElementById('nombre').value;
@@ -326,18 +361,25 @@
                     createdAt: serverTimestamp()
                 };
 
+                // Intento de guardado en Firestore
                 await addDoc(getAthletesCollection(), athleteData);
                 
                 alertUser('Atleta y datos de nómina guardados correctamente.', 'success');
                 document.getElementById('athleteForm').reset();
             } catch (error) {
-                console.error("Error al guardar atleta:", error);
-                alertUser('Error al guardar. Revisa la consola.', 'error');
+                console.error("Error al guardar atleta en Firestore:", error);
+                // Mostrar un mensaje de error detallado si algo falla
+                alertUser(`Error al guardar: ${error.message}. Revisa la consola para más detalles.`, 'error');
+            } finally {
+                isSaving = false;
+                document.getElementById('saveButton').textContent = 'Guardar Atleta y Nómina';
+                document.getElementById('saveButton').disabled = false;
             }
         }
         
         window.loadAthletes = function() {
-            if (!isAuthReady || !currentClubId) return;
+            // **VERIFICACIÓN CRÍTICA PARA ASINCRONÍA**
+            if (!isAuthReady || !currentClubId || !db) return;
 
             const q = query(
                 getAthletesCollection(),
@@ -391,6 +433,11 @@
         }
         
         window.deleteAthlete = async function(id) {
+             if (!isAuthReady || !db) {
+                alertUser('Error de inicialización: Firebase no está listo.', 'error');
+                return;
+            }
+            
             // Implementación de modal de confirmación simple (en lugar de alert())
             const confirmation = document.createElement('div');
             confirmation.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
@@ -426,7 +473,14 @@
             saveMessage.textContent = message;
             saveMessage.classList.remove('hidden', 'text-green-600', 'text-red-600');
             saveMessage.classList.add(type === 'success' ? 'text-green-600' : 'text-red-600');
-            setTimeout(() => { saveMessage.classList.add('hidden'); }, 4000);
+            
+            // Mostrar mensaje
+            saveMessage.classList.remove('hidden');
+            
+            // Ocultar después de 4 segundos
+            setTimeout(() => { 
+                saveMessage.classList.add('hidden'); 
+            }, 4000);
         }
 
     </script>
