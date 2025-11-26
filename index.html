@@ -55,14 +55,14 @@
             </button>
 
             <!-- Claves de Ejemplo para Pruebas -->
-            <div class="mt-8 p-4 bg-gray-50 rounded-lg text-xs text-gray-600">
-                <p class="font-bold mb-2">Claves de Prueba (Simulación):</p>
+            <div class="mt-8 p-4 bg-red-50 rounded-lg text-xs text-gray-600">
+                <p class="font-bold mb-2 text-red-800">MODO SIMULACIÓN ACTIVO</p>
+                <p class="mb-2">Utiliza estas claves para acceder a los datos simulados de cada club. Los datos no se guardarán permanentemente.</p>
                 <ul class="list-disc list-inside space-y-1">
                     <li>**Águilas de Voleibol:** Clave `aguilas2025`</li>
                     <li>**Pumas de Voleibol:** Clave `pumas2025`</li>
                     <li>**Estrellas de Voleibol:** Clave `estrellas2025`</li>
                 </ul>
-                <p class="mt-3 text-red-600 font-semibold">ADVERTENCIA: La base de datos no está conectada. Los datos NO se guardarán.</p>
             </div>
         </div>
     </div>
@@ -167,6 +167,7 @@
     <!-- Script de Firebase y Lógica -->
     <script type="module">
         // Importaciones de Firebase SDK (v11.6.1)
+        // Se importan, pero se usarán solo si NO estamos en modo simulación
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, addDoc, onSnapshot, collection, query, where, deleteDoc, setLogLevel, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -175,58 +176,70 @@
         setLogLevel('Debug');
 
         // --- Configuración de Firebase y Variables Globales ---
-        // Variables globales proporcionadas por el entorno (MANDATORIO)
+        const MOCK_API_KEY = "MOCK_API_KEY"; // Clave de simulación
+
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
-        // Determinar la configuración a usar SÓLO DEL ENTORNO
         let firebaseConfig = {};
         try {
-            // 1. Intentar usar la configuración del entorno
             firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         } catch (e) {
             console.error("ERROR al parsear __firebase_config. Usando configuración vacía.", e);
         }
 
-        // 2. *** CRÍTICO: Inyectar una configuración simulada si la real está vacía ***
+        // 2. CRÍTICO: Inyectar una configuración simulada si la real está vacía
+        let isSimulationMode = false;
         if (Object.keys(firebaseConfig).length === 0) {
-            console.warn("ADVERTENCIA: La configuración de Firebase está vacía. Usando credenciales simuladas para evitar fallos de inicialización. Los datos NO se guardarán.");
-            // Esta es una configuración ficticia que permite que initializeApp no falle por un objeto vacío.
-            firebaseConfig = {
-                apiKey: "MOCK_API_KEY",
-                authDomain: "mock-project.firebaseapp.com",
-                projectId: "mock-project-id",
-                storageBucket: "mock-project.appspot.com",
-                messagingSenderId: "123456789012",
-                appId: "1:123456789012:web:a1b2c3d4e5f6g7h8i9j0"
-            };
+            console.warn("ADVERTENCIA: Configuración vacía. Activando MODO SIMULACIÓN.");
+            isSimulationMode = true;
+            firebaseConfig = { apiKey: MOCK_API_KEY }; // Configuración mínima para initializeApp
+        } else if (firebaseConfig.apiKey === MOCK_API_KEY) {
+             // Si por alguna razón la mock key persiste, también activamos la simulación
+            isSimulationMode = true;
         }
-        
-        // Inicialización de Firebase
+
         let app, db, auth;
         let userId = null;
         let isAuthReady = false;
-        let isSaving = false; // Estado para prevenir doble envío
+        let isSaving = false; 
         let currentClubId = null;
 
-        // Simulación de Claves de Club (Debe ser manejado por Firebase Auth en producción)
+        // *** Almacenamiento Simulado (Solo para MODO SIMULACIÓN) ***
+        let mockAthletes = [
+            // Datos de ejemplo para Águilas
+            { id: 'mock-1', clubId: 'Águilas de Voleibol', nombre: 'Carlos', apellido: 'Gómez', fechaNacimiento: '1995-05-20', telefono: '555-1234', peso: 85.5, talla: 1.95, salarioBase: 1200.00, frecuenciaPago: 'mensual', ultimaFechaPago: '2025-11-01' },
+            { id: 'mock-2', clubId: 'Águilas de Voleibol', nombre: 'María', apellido: 'Pérez', fechaNacimiento: '1998-08-10', telefono: '555-5678', peso: 65.0, talla: 1.70, salarioBase: 800.00, frecuenciaPago: 'quincenal', ultimaFechaPago: '2025-11-15' },
+            // Datos de ejemplo para Pumas
+            { id: 'mock-3', clubId: 'Pumas de Voleibol', nombre: 'Ricardo', apellido: 'López', fechaNacimiento: '2000-01-01', telefono: '555-9012', peso: 78.2, talla: 1.80, salarioBase: 950.00, frecuenciaPago: 'semanal', ultimaFechaPago: '2025-11-22' }
+        ];
+
+        // Simulación de Claves de Club
         const clubCredentials = {
             'Águilas de Voleibol': 'aguilas2025',
             'Pumas de Voleibol': 'pumas2025',
             'Estrellas de Voleibol': 'estrellas2025'
         };
-
+        
         // --- Inicialización y Autenticación ---
 
-        // Función de Autenticación
         async function setupFirebase() {
             try {
-                // Se ejecuta con la configuración real o la simulada
+                // 1. Inicializar Firebase (Solo necesita la config mock para evitar el error)
                 app = initializeApp(firebaseConfig);
+                
+                if (isSimulationMode) {
+                    console.log("MODO SIMULACIÓN: Saltando Autenticación de Firebase.");
+                    userId = 'mock-user-id'; // Asignar un ID simulado
+                    isAuthReady = true;
+                    document.getElementById('loadingMessage').textContent = 'MODO SIMULACIÓN ACTIVO. Datos no persistentes.';
+                    return; // SALIR DE LA FUNCIÓN, NO CONTACTAR A GOOGLE
+                }
+
+                // --- Lógica REAL de Firebase (Solo si no es simulación) ---
                 db = getFirestore(app);
                 auth = getAuth(app);
 
-                // Autenticación con Token (si está disponible) o Anónima
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
                 } else {
@@ -238,19 +251,19 @@
                         userId = user.uid;
                         isAuthReady = true;
                         console.log("Firebase Auth listo. UserID:", userId);
-                        // Si el club ya está logeado, cargar datos
                         if (currentClubId) {
                             loadAthletes();
                         }
                     } else {
-                        isAuthReady = true; // Auth ha terminado de verificar, aunque no haya usuario.
+                        isAuthReady = true; 
                         console.log("Sesión anónima/no autenticada.");
                     }
                 });
 
             } catch (error) {
-                console.error("Error al inicializar o autenticar Firebase:", error);
-                document.getElementById('loadingMessage').textContent = `Error al inicializar Firebase: ${error.code || error.message}. Revise la consola.`;
+                // Si falla por API key, pero la config no era mock, es un error real de setup.
+                console.error("Error CRÍTICO al inicializar o autenticar Firebase:", error);
+                document.getElementById('loadingMessage').textContent = `Error CRÍTICO de Firebase: ${error.code || error.message}. Revise la consola.`;
                 db = null;
                 auth = null;
                 isAuthReady = true;
@@ -269,20 +282,15 @@
             document.getElementById('loginButton').disabled = true;
             document.getElementById('loginButton').textContent = 'Verificando...';
 
-
-            // Simulación de validación
             if (clubCredentials[clubName] === clubKey) {
                 currentClubId = clubName;
                 document.getElementById('currentClubDisplay').textContent = clubName;
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
                 
-                // Cargar datos si la autenticación ya está lista
+                // Cargar datos
                 if (isAuthReady) {
                     loadAthletes();
-                } else {
-                    // Si Auth no está lista, loadAthletes se llamará en onAuthStateChanged
-                    document.getElementById('loadingMessage').textContent = 'Esperando conexión con Firebase...';
                 }
 
             } else {
@@ -304,28 +312,48 @@
             document.getElementById('athleteCount').textContent = '0';
         }
 
-        // --- Funciones de CRUD (Firestore) ---
+        // --- Funciones de CRUD (Simuladas o Reales) ---
 
-        // Referencia a la colección pública, filtrada por app id
-        const getAthletesCollection = () => {
-             // Colección pública (para compartir datos entre usuarios/clubes en la plataforma)
-             const path = `artifacts/${appId}/public/data/athletes`;
-             // CRÍTICO: Asegurarse de que 'db' no sea null antes de llamar a collection
-             return db ? collection(db, path) : null;
-        };
+        // Función para renderizar la tabla con los datos actuales
+        function renderAthletes(athletes) {
+            const athletesTableBody = document.getElementById('athletesTableBody');
+            athletesTableBody.innerHTML = '';
+            
+            // Ordenar atletas por nombre (client-side)
+            athletes.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+            athletes.forEach(athlete => {
+                const row = athletesTableBody.insertRow();
+                row.className = 'hover:bg-gray-50';
+
+                const pesoTalla = `${athlete.peso} kg / ${athlete.talla} m`;
+                const salario = `$${athlete.salarioBase.toFixed(2)} (${athlete.frecuenciaPago})`;
+                const ultimaPago = athlete.ultimaFechaPago || 'N/A';
+
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${athlete.nombre} ${athlete.apellido}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${athlete.fechaNacimiento}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${pesoTalla}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${salario}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        ${ultimaPago}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="deleteAthlete('${athlete.id}')" class="text-red-600 hover:text-red-900 ml-2">Eliminar</button>
+                    </td>
+                `;
+            });
+            document.getElementById('athleteCount').textContent = athletes.length;
+            document.getElementById('loadingMessage').textContent = athletes.length === 0 
+                ? 'No hay atletas registrados para este club.' 
+                : '';
+        }
 
         window.saveAthlete = async function(event) {
             event.preventDefault();
 
             if (isSaving) {
                 alertUser('Guardando datos, por favor espera...', 'error');
-                return;
-            }
-
-            // **VERIFICACIÓN CRÍTICA PARA ASINCRONÍA: Asegura que Firebase y DB estén listos**
-            if (!isAuthReady || !db) {
-                alertUser('Error: La base de datos no está disponible. Inicialización fallida o se usa configuración simulada.', 'error');
-                console.error("Firebase o Autenticación no está lista para la escritura.");
                 return;
             }
             if (!currentClubId) {
@@ -337,40 +365,51 @@
             document.getElementById('saveButton').textContent = 'Guardando...';
             document.getElementById('saveButton').disabled = true;
 
-            try {
-                const nombre = document.getElementById('nombre').value;
-                const apellido = document.getElementById('apellido').value;
-                const fechaNacimiento = document.getElementById('fechaNacimiento').value;
-                const telefono = document.getElementById('telefono').value;
-                const peso = parseFloat(document.getElementById('peso').value);
-                const talla = parseFloat(document.getElementById('talla').value);
-                const salarioBase = parseFloat(document.getElementById('salarioBase').value);
-                const frecuenciaPago = document.getElementById('frecuenciaPago').value;
-                const ultimaFechaPago = document.getElementById('ultimaFechaPago').value;
+            const nombre = document.getElementById('nombre').value;
+            const apellido = document.getElementById('apellido').value;
+            const fechaNacimiento = document.getElementById('fechaNacimiento').value;
+            const telefono = document.getElementById('telefono').value;
+            const peso = parseFloat(document.getElementById('peso').value);
+            const talla = parseFloat(document.getElementById('talla').value);
+            const salarioBase = parseFloat(document.getElementById('salarioBase').value);
+            const frecuenciaPago = document.getElementById('frecuenciaPago').value;
+            const ultimaFechaPago = document.getElementById('ultimaFechaPago').value;
                 
-                const athleteData = {
-                    clubId: currentClubId, // CLAVE DE SEGREGACIÓN DE DATOS
-                    nombre,
-                    apellido,
-                    fechaNacimiento,
-                    telefono,
-                    peso,
-                    talla,
-                    salarioBase,
-                    frecuenciaPago,
-                    ultimaFechaPago: ultimaFechaPago || null,
-                    createdAt: serverTimestamp()
-                };
+            const athleteData = {
+                clubId: currentClubId,
+                nombre,
+                apellido,
+                fechaNacimiento,
+                telefono,
+                peso,
+                talla,
+                salarioBase,
+                frecuenciaPago,
+                ultimaFechaPago: ultimaFechaPago || null,
+            };
 
-                // Intento de guardado en Firestore
-                await addDoc(getAthletesCollection(), athleteData);
+            try {
+                if (isSimulationMode) {
+                    // *** MODO SIMULACIÓN: Guardar en array local ***
+                    athleteData.id = 'mock-' + Date.now();
+                    mockAthletes.push(athleteData);
+                    loadAthletes(); // Recargar tabla desde mock data
+                    alertUser('Atleta y datos de nómina guardados temporalmente.', 'success');
+                } else {
+                    // --- Lógica REAL de Firestore ---
+                     if (!isAuthReady || !db) {
+                        alertUser('Error: La base de datos real no está lista.', 'error');
+                        return;
+                    }
+                    const path = `artifacts/${appId}/public/data/athletes`;
+                    await addDoc(collection(db, path), { ...athleteData, createdAt: serverTimestamp() });
+                    alertUser('Atleta y datos de nómina guardados correctamente en Firestore.', 'success');
+                }
                 
-                alertUser('Atleta y datos de nómina guardados correctamente.', 'success');
                 document.getElementById('athleteForm').reset();
             } catch (error) {
-                console.error("Error al guardar atleta en Firestore:", error);
-                // Mostrar un mensaje de error detallado si algo falla (p.ej., permisos con la mock config)
-                alertUser(`Error al guardar: ${error.message}. Es probable que se deba a la configuración simulada.`, 'error');
+                console.error("Error al guardar atleta:", error);
+                alertUser(`Error al guardar: ${error.message}.`, 'error');
             } finally {
                 isSaving = false;
                 document.getElementById('saveButton').textContent = 'Guardar Atleta y Nómina';
@@ -379,101 +418,76 @@
         }
         
         window.loadAthletes = function() {
-            // **VERIFICACIÓN CRÍTICA PARA ASINCRONÍA**
+            document.getElementById('loadingMessage').textContent = 'Cargando datos...';
+
+            if (isSimulationMode) {
+                // *** MODO SIMULACIÓN: Cargar desde array local ***
+                const clubAthletes = mockAthletes.filter(a => a.clubId === currentClubId);
+                renderAthletes(clubAthletes);
+                document.getElementById('loadingMessage').textContent = 'MODO SIMULACIÓN ACTIVO. Los datos no persisten.';
+                return;
+            }
+            
+            // --- Lógica REAL de Firestore ---
             if (!isAuthReady || !currentClubId || !db) {
-                document.getElementById('loadingMessage').textContent = 'ADVERTENCIA: Base de Datos no disponible (simulación activa).';
-                // Si la DB no está lista, simulamos que la carga ha terminado.
-                document.getElementById('athleteCount').textContent = '0 (Simulación)';
-                document.getElementById('athletesTableBody').innerHTML = '';
+                document.getElementById('loadingMessage').textContent = 'Esperando conexión segura con la Base de Datos...';
                 return;
             }
 
-            const athletesCollection = getAthletesCollection();
-            if (!athletesCollection) return; // Doble chequeo por seguridad
+            const path = `artifacts/${appId}/public/data/athletes`;
+            const athletesCollection = collection(db, path); 
 
             const q = query(
                 athletesCollection,
-                where("clubId", "==", currentClubId) // FILTRO CLAVE POR CLUB
+                where("clubId", "==", currentClubId) 
             );
-
-            document.getElementById('loadingMessage').textContent = 'Cargando datos...';
 
             // Escucha en tiempo real de los datos del club actual
             onSnapshot(q, (snapshot) => {
-                const athletesTableBody = document.getElementById('athletesTableBody');
-                athletesTableBody.innerHTML = ''; // Limpiar la tabla
                 const athletes = [];
 
                 snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    athletes.push({ id: doc.id, ...data });
+                    athletes.push({ id: doc.id, ...doc.data() });
                 });
 
-                document.getElementById('athleteCount').textContent = athletes.length;
-                document.getElementById('loadingMessage').textContent = athletes.length === 0 
-                    ? 'No hay atletas registrados para este club.' 
-                    : '';
-                
-                // Ordenar atletas por nombre (client-side)
-                athletes.sort((a, b) => a.nombre.localeCompare(b.nombre));
-
-                athletes.forEach(athlete => {
-                    const row = athletesTableBody.insertRow();
-                    row.className = 'hover:bg-gray-50';
-
-                    const pesoTalla = `${athlete.peso} kg / ${athlete.talla} m`;
-                    const salario = `$${athlete.salarioBase.toFixed(2)} (${athlete.frecuenciaPago})`;
-                    const ultimaPago = athlete.ultimaFechaPago || 'N/A';
-
-                    row.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${athlete.nombre} ${athlete.apellido}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${athlete.fechaNacimiento}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${pesoTalla}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${salario}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${ultimaPago}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button onclick="deleteAthlete('${athlete.id}')" class="text-red-600 hover:text-red-900 ml-2">Eliminar</button>
-                        </td>
-                    `;
-                });
+                renderAthletes(athletes);
             }, (error) => {
-                console.error("Error al escuchar datos:", error);
+                console.error("Error al escuchar datos de Firestore:", error);
                 document.getElementById('loadingMessage').textContent = `Error al cargar datos. ${error.message}. Revisa la consola.`;
             });
         }
         
         window.deleteAthlete = async function(id) {
-             if (!isAuthReady || !db) {
-                alertUser('Error: La base de datos no está disponible. Inicialización fallida o se usa configuración simulada.', 'error');
-                return;
-            }
-            
-            // Implementación de modal de confirmación simple (en lugar de alert())
-            const confirmation = document.createElement('div');
-            confirmation.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-            confirmation.innerHTML = `
-                <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full text-center">
-                    <h3 class="text-lg font-bold mb-4">Confirmar Eliminación</h3>
-                    <p class="mb-6">¿Estás seguro de que deseas eliminar este atleta?</p>
-                    <div class="flex justify-end space-x-3">
-                        <button id="cancelDelete" class="py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100">Cancelar</button>
-                        <button id="confirmDelete" class="py-2 px-4 vinotinto-bg text-white rounded-lg hover:bg-red-700">Eliminar</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(confirmation);
-
-            document.getElementById('cancelDelete').onclick = () => document.body.removeChild(confirmation);
-            document.getElementById('confirmDelete').onclick = async () => {
-                document.body.removeChild(confirmation);
+            // Confirmación de eliminación (manteniendo el modal)
+            const confirmation = createConfirmModal('¿Estás seguro de que deseas eliminar este atleta?', async () => {
                 try {
-                    await deleteDoc(doc(getAthletesCollection(), id));
-                    alertUser('Atleta eliminado correctamente.', 'success');
+                    if (isSimulationMode) {
+                        // *** MODO SIMULACIÓN: Eliminar de array local ***
+                        const initialLength = mockAthletes.length;
+                        mockAthletes = mockAthletes.filter(a => a.id !== id);
+                        if (mockAthletes.length < initialLength) {
+                            loadAthletes(); 
+                            alertUser('Atleta eliminado temporalmente.', 'success');
+                        } else {
+                            alertUser('Error: Atleta no encontrado en la simulación.', 'error');
+                        }
+
+                    } else {
+                        // --- Lógica REAL de Firestore ---
+                        if (!isAuthReady || !db) {
+                            alertUser('Error: La base de datos real no está disponible.', 'error');
+                            return;
+                        }
+                        const path = `artifacts/${appId}/public/data/athletes`;
+                        await deleteDoc(doc(db, path, id));
+                        alertUser('Atleta eliminado correctamente de Firestore.', 'success');
+                    }
                 } catch (error) {
                     console.error("Error al eliminar atleta:", error);
-                    alertUser(`Error al eliminar: ${error.message}. Es probable que se deba a la configuración simulada.`, 'error');
+                    alertUser(`Error al eliminar: ${error.message}.`, 'error');
                 }
-            };
+            });
+            document.body.appendChild(confirmation);
         }
 
 
@@ -484,14 +498,36 @@
             saveMessage.classList.remove('hidden', 'text-green-600', 'text-red-600');
             saveMessage.classList.add(type === 'success' ? 'text-green-600' : 'text-red-600');
             
-            // Mostrar mensaje
             saveMessage.classList.remove('hidden');
             
-            // Ocultar después de 4 segundos
             setTimeout(() => { 
                 saveMessage.classList.add('hidden'); 
             }, 4000);
         }
+        
+        function createConfirmModal(message, onConfirm) {
+            const confirmation = document.createElement('div');
+            confirmation.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            confirmation.innerHTML = `
+                <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full text-center">
+                    <h3 class="text-lg font-bold mb-4 rojo-text">Confirmar Acción</h3>
+                    <p class="mb-6 text-gray-700">${message}</p>
+                    <div class="flex justify-center space-x-3">
+                        <button id="cancelAction" class="py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition">Cancelar</button>
+                        <button id="confirmAction" class="py-2 px-4 vinotinto-bg text-white rounded-lg vinotinto-hover transition">Confirmar</button>
+                    </div>
+                </div>
+            `;
+
+            confirmation.querySelector('#cancelAction').onclick = () => document.body.removeChild(confirmation);
+            confirmation.querySelector('#confirmAction').onclick = () => {
+                document.body.removeChild(confirmation);
+                onConfirm();
+            };
+            
+            return confirmation;
+        }
+
 
     </script>
 </body>
