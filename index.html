@@ -183,11 +183,8 @@
         try {
             // Intentar usar la configuración del entorno
             firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-            if (Object.keys(firebaseConfig).length === 0) {
-                console.warn("ADVERTENCIA: __firebase_config del entorno está vacío. Esto podría causar fallos de conexión.");
-            }
         } catch (e) {
-            console.error("ERROR al parsear __firebase_config.", e);
+            console.error("ERROR al parsear __firebase_config. Usando configuración vacía.", e);
         }
         
         // Inicialización de Firebase
@@ -208,9 +205,17 @@
 
         // Función de Autenticación
         async function setupFirebase() {
+            // CRÍTICO: Verificar si la configuración es válida antes de inicializar
+            if (Object.keys(firebaseConfig).length === 0) {
+                console.error("FALLO CRÍTICO: La configuración de Firebase está vacía. La aplicación no podrá guardar ni cargar datos.");
+                document.getElementById('loadingMessage').textContent = 'ADVERTENCIA: Conexión a Base de Datos fallida (Configuración vacía).';
+                db = null;
+                auth = null;
+                isAuthReady = true; // Permite que la interfaz cargue sin errores
+                return; // Detener la inicialización
+            }
+            
             try {
-                // ** IMPORTANTE: Se ha eliminado el chequeo de firebaseConfig.projectId para evitar el error anterior **
-                
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
@@ -239,7 +244,10 @@
 
             } catch (error) {
                 console.error("Error al inicializar o autenticar Firebase:", error);
-                document.getElementById('loadingMessage').textContent = `Error de conexión con Firebase: ${error.code || error.message}. Revise la consola.`;
+                document.getElementById('loadingMessage').textContent = `Error CRÍTICO al inicializar Firebase: ${error.code || error.message}. Revise la consola.`;
+                db = null;
+                auth = null;
+                isAuthReady = true;
             }
         }
         setupFirebase();
@@ -296,7 +304,8 @@
         const getAthletesCollection = () => {
              // Colección pública (para compartir datos entre usuarios/clubes en la plataforma)
              const path = `artifacts/${appId}/public/data/athletes`;
-             return collection(db, path);
+             // CRÍTICO: Asegurarse de que 'db' no sea null antes de llamar a collection
+             return db ? collection(db, path) : null;
         };
 
         window.saveAthlete = async function(event) {
@@ -307,9 +316,9 @@
                 return;
             }
 
-            // **VERIFICACIÓN CRÍTICA PARA ASINCRONÍA: Asegura que Firebase y Auth estén listos**
+            // **VERIFICACIÓN CRÍTICA PARA ASINCRONÍA: Asegura que Firebase y DB estén listos**
             if (!isAuthReady || !db) {
-                alertUser('Error de inicialización: Firebase no está listo. Intenta de nuevo en un momento.', 'error');
+                alertUser('Error: La base de datos no está disponible. Revise la configuración de Firebase en la consola.', 'error');
                 console.error("Firebase o Autenticación no está lista para la escritura.");
                 return;
             }
@@ -365,10 +374,16 @@
         
         window.loadAthletes = function() {
             // **VERIFICACIÓN CRÍTICA PARA ASINCRONÍA**
-            if (!isAuthReady || !currentClubId || !db) return;
+            if (!isAuthReady || !currentClubId || !db) {
+                document.getElementById('loadingMessage').textContent = 'ADVERTENCIA: No se puede conectar a la Base de Datos para cargar atletas.';
+                return;
+            }
+
+            const athletesCollection = getAthletesCollection();
+            if (!athletesCollection) return; // Doble chequeo por seguridad
 
             const q = query(
-                getAthletesCollection(),
+                athletesCollection,
                 where("clubId", "==", currentClubId) // FILTRO CLAVE POR CLUB
             );
 
@@ -420,7 +435,7 @@
         
         window.deleteAthlete = async function(id) {
              if (!isAuthReady || !db) {
-                alertUser('Error de inicialización: Firebase no está listo.', 'error');
+                alertUser('Error: La base de datos no está disponible. Revise la configuración de Firebase en la consola.', 'error');
                 return;
             }
             
