@@ -178,28 +178,20 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
-        // Configuración del usuario como fallback si el entorno no la proporciona
-        const userFirebaseConfig = {
-            apiKey: "AIzaSyAY969o0Q8owhHq-UBylXI_LLMz6znuuus",
-            authDomain: "datacontrolvoley.firebaseapp.com",
-            projectId: "datacontrolvoley",
-            storageBucket: "datacontrolvoley.firebasestorage.app",
-            messagingSenderId: "143088489286",
-            appId: "1:143088489286:web:09f9d26d7b698ee5cf0b47"
-        };
-        
-        // Determinar la configuración a usar
-        let firebaseConfig;
+        // Determinar la configuración a usar SÓLO DEL ENTORNO
+        let firebaseConfig = {};
         try {
+            // Intentar usar la configuración del entorno
             firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
             if (Object.keys(firebaseConfig).length === 0) {
-                console.warn("ADVERTENCIA: __firebase_config del entorno está vacío. Usando configuración proporcionada por el usuario como fallback.");
-                firebaseConfig = userFirebaseConfig;
+                console.warn("ADVERTENCIA: __firebase_config del entorno está vacío. Esto podría causar fallos de conexión.");
             }
         } catch (e) {
-            console.error("ERROR al parsear __firebase_config. Usando configuración proporcionada por el usuario como fallback.", e);
-            firebaseConfig = userFirebaseConfig;
+            console.error("ERROR al parsear __firebase_config.", e);
         }
+        
+        // Si la configuración del entorno falla, el resto del proceso fallará
+        // pero evitamos usar la configuración anterior que causaba el error de Auth.
 
         // Inicialización de Firebase
         let app, db, auth;
@@ -221,6 +213,7 @@
         async function setupFirebase() {
             try {
                 if (!firebaseConfig || !firebaseConfig.projectId) {
+                     document.getElementById('loadingMessage').textContent = 'Error: No hay configuración válida de Firebase para inicializar.';
                      console.error("Error: firebaseConfig es inválido o no tiene projectId. No se puede inicializar Firebase.");
                      return;
                 }
@@ -233,6 +226,7 @@
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
                 } else {
+                    // Esta llamada es la que fallaba con la configuración de fallback.
                     await signInAnonymously(auth);
                 }
 
@@ -253,7 +247,7 @@
 
             } catch (error) {
                 console.error("Error al inicializar o autenticar Firebase:", error);
-                document.getElementById('loadingMessage').textContent = 'Error de conexión con Firebase. Ver consola.';
+                document.getElementById('loadingMessage').textContent = `Error de conexión con Firebase: ${error.code || error.message}. Revise la consola.`;
             }
         }
         setupFirebase();
