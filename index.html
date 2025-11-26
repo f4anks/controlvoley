@@ -139,8 +139,13 @@
                             <input type="date" id="ultimaFechaPago" class="w-full p-2 border rounded-lg focus:ring-rojo-brillante focus:border-rojo-brillante">
                         </div>
                     </div>
+                    
+                    <!-- Indicador de estado de conexión -->
+                    <p id="connectionStatus" class="mt-4 text-sm text-center font-medium text-yellow-600">
+                        Conectando con el servidor...
+                    </p>
 
-                    <button type="submit" id="saveButton" class="w-full mt-6 py-3 vinotinto-bg text-white font-semibold rounded-lg vinotinto-hover transition duration-200">
+                    <button type="submit" id="saveButton" class="w-full mt-3 py-3 vinotinto-bg text-white font-semibold rounded-lg vinotinto-hover transition duration-200" disabled>
                         Guardar Atleta y Nómina
                     </button>
                     <div id="saveMessage" class="text-center mt-3 text-sm hidden"></div>
@@ -203,6 +208,10 @@
         let isSaving = false; 
         let currentClubId = null;
 
+        // Elementos de UI
+        const saveButton = document.getElementById('saveButton');
+        const connectionStatusElement = document.getElementById('connectionStatus');
+
         // Simulación de Claves de Club
         const clubCredentials = {
             'Águilas de Voleibol': 'aguilas2025',
@@ -211,6 +220,23 @@
         };
         
         // --- Funciones de Utilidad ---
+
+        function updateSaveButtonState() {
+            if (currentClubId && isAuthReady && db && userId) {
+                saveButton.disabled = false;
+                connectionStatusElement.textContent = '¡Conexión lista! Puede guardar datos.';
+                connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-green-600';
+            } else {
+                saveButton.disabled = true;
+                if (!currentClubId) {
+                    connectionStatusElement.textContent = 'Por favor, inicie sesión primero.';
+                    connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-gray-600';
+                } else {
+                    connectionStatusElement.textContent = 'Conectando con el servidor...';
+                    connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-yellow-600';
+                }
+            }
+        }
 
         function calculateAge(dateOfBirth) {
             const dob = new Date(dateOfBirth);
@@ -248,6 +274,7 @@
             const userIdElement = document.getElementById('currentUserId');
             authStatusElement.textContent = 'Inicializando...';
             userIdElement.textContent = 'N/A';
+            updateSaveButtonState(); // Desactivar al inicio
 
             try {
                 if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
@@ -275,13 +302,15 @@
                         authStatusElement.textContent = 'Conectado';
                         userIdElement.textContent = userId;
                         console.log("Firebase Auth listo. UserID:", userId);
-                        if (currentClubId) {
-                            loadAthletes(); // Cargar datos si el club ya está seleccionado
-                        }
                     } else {
                         userId = null;
                         authStatusElement.textContent = 'Anónimo/Desconectado';
                         console.log("Sesión anónima/no autenticada.");
+                    }
+                    updateSaveButtonState(); // Habilitar/deshabilitar botón
+                    
+                    if (currentClubId) {
+                        loadAthletes(); // Cargar datos si el club ya está seleccionado
                     }
                 });
 
@@ -290,6 +319,7 @@
                 authStatusElement.textContent = 'ERROR Crítico';
                 document.getElementById('loadingMessage').textContent = `Error CRÍTICO de Firebase: ${error.code || error.message}. Revise la consola.`;
                 isAuthReady = true;
+                updateSaveButtonState();
             }
         }
         setupFirebase();
@@ -312,11 +342,13 @@
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
                 
+                updateSaveButtonState(); // Actualizar estado de conexión/guardado
+                
                 // Cargar datos si Firebase ya está listo, si no, se cargarán al terminar onAuthStateChanged
                 if (isAuthReady && db) {
                     loadAthletes();
                 } else {
-                    document.getElementById('loadingMessage').textContent = 'Autenticando Firebase y cargando datos, por favor espere...';
+                    document.getElementById('loadingMessage').textContent = 'Esperando a la autenticación de Firebase para cargar los datos...';
                 }
 
             } else {
@@ -336,6 +368,7 @@
             document.getElementById('clubNameInput').value = '';
             document.getElementById('athletesTableBody').innerHTML = ''; // Limpiar tabla
             document.getElementById('athleteCount').textContent = '0';
+            updateSaveButtonState();
         }
 
         // --- Funciones de Datos (Firestore) ---
@@ -345,19 +378,19 @@
          */
         window.saveAthlete = async function(event) {
             event.preventDefault();
-            // Guardia de conexión principal
-            if (isSaving || !currentClubId || !isAuthReady || !db || !userId) {
+            
+            // Guardia de conexión principal mejorada
+            if (isSaving || saveButton.disabled || !currentClubId || !db || !userId) {
                 document.getElementById('saveMessage').textContent = 'Error: Base de datos no lista o no autenticado. Espere y vuelva a intentarlo.';
                 document.getElementById('saveMessage').classList.remove('hidden');
                 document.getElementById('saveMessage').classList.add('error');
                 return;
             }
 
-            const saveButton = document.getElementById('saveButton');
             const saveMessage = document.getElementById('saveMessage');
             
             saveMessage.classList.add('hidden');
-            saveButton.disabled = true;
+            saveButton.disabled = true; // Desactivar inmediatamente
             saveButton.textContent = 'Guardando...';
             isSaving = true;
 
@@ -395,8 +428,8 @@
                 saveMessage.classList.add('error');
             } finally {
                 saveButton.textContent = 'Guardar Atleta y Nómina';
-                saveButton.disabled = false;
                 isSaving = false;
+                updateSaveButtonState(); // Re-habilitar si todo está listo
             }
         }
         
