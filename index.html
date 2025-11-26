@@ -10,19 +10,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --color-vinotinto: #800020; /* Vinotinto */
-            --color-rojo-brillante: #FF4500; /* Rojo Brillante */
+            --color-azul-marino: #001F3F;    /* Azul Marino */
+            --color-azul-electrico: #0074D9; /* Azul Eléctrico */
         }
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8f8f8;
         }
-        .vinotinto-bg { background-color: var(--color-vinotinto); }
-        .vinotinto-hover:hover { background-color: #6a001a; }
-        .rojo-text { color: var(--color-rojo-brillante); }
-        .rojo-border { border-color: var(--color-rojo-brillante); }
+        .azul-marino-bg { background-color: var(--color-azul-marino); }
+        .azul-marino-hover:hover { background-color: #001a33; } /* Tono más oscuro para hover */
+        .azul-electrico-text { color: var(--color-azul-electrico); }
+        .azul-electrico-border { border-color: var(--color-azul-electrico); }
         .rounded-xl { border-radius: 0.75rem; }
-        .shadow-lg-vinotinto { box-shadow: 0 10px 15px -3px rgba(128, 0, 32, 0.2), 0 4px 6px -2px rgba(128, 0, 32, 0.1); }
+        /* Ajuste de sombra para reflejar el color principal */
+        .shadow-lg-azul { box-shadow: 0 10px 15px -3px rgba(0, 31, 63, 0.2), 0 4px 6px -2px rgba(0, 31, 63, 0.1); }
         input[type="number"]::-webkit-inner-spin-button, 
         input[type="number"]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
@@ -37,30 +38,29 @@
 
     <!-- Pantalla de Login -->
     <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-        <div class="bg-white p-8 rounded-xl shadow-lg-vinotinto w-full max-w-md">
+        <div class="bg-white p-8 rounded-xl shadow-lg-azul w-full max-w-md">
             <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Acceso a Clubes</h1>
             <p class="text-center mb-8 text-sm text-gray-600">Por favor, ingresa el nombre de tu club y la clave para acceder a tus datos.</p>
             
             <div class="mb-4">
                 <label for="clubNameInput" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Club</label>
-                <!-- Placeholder actualizado a los nuevos nombres -->
-                <input type="text" id="clubNameInput" class="w-full p-3 border rounded-lg focus:ring-2 rojo-border focus:border-rojo-brillante" placeholder="Ej: Angeles">
+                <input type="text" id="clubNameInput" class="w-full p-3 border rounded-lg focus:ring-2 azul-electrico-border focus:border-azul-electrico" placeholder="Ej: Angeles">
             </div>
             
             <div class="mb-6">
                 <label for="clubKeyInput" class="block text-sm font-medium text-gray-700 mb-1">Clave de Acceso</label>
-                <input type="password" id="clubKeyInput" class="w-full p-3 border rounded-lg focus:ring-2 rojo-border focus:border-rojo-brillante" placeholder="Ingresa la clave">
+                <input type="password" id="clubKeyInput" class="w-full p-3 border rounded-lg focus:ring-2 azul-electrico-border focus:border-azul-electrico" placeholder="Ingresa la clave">
             </div>
 
             <div id="loginMessage" class="text-sm text-red-600 mb-4 text-center hidden"></div>
 
-            <button onclick="handleLogin()" id="loginButton" class="w-full py-3 vinotinto-bg text-white font-semibold rounded-lg vinotinto-hover transition duration-200">
+            <button onclick="handleLogin()" id="loginButton" class="w-full py-3 azul-marino-bg text-white font-semibold rounded-lg azul-marino-hover transition duration-200">
                 Iniciar Sesión
             </button>
 
             <!-- Claves de Ejemplo ACTUALIZADAS para Pruebas -->
-            <div class="mt-8 p-4 bg-red-50 rounded-lg text-xs text-gray-600">
-                <p class="font-bold mb-2 text-red-800">CLAVES DE ACCESO DE PRUEBA</p>
+            <div class="mt-8 p-4 bg-blue-50 rounded-lg text-xs text-gray-600">
+                <p class="font-bold mb-2 text-blue-800">CLAVES DE ACCESO DE PRUEBA</p>
                 <p class="mb-2">Los datos que registres SÍ se guardarán en tu base de datos (Firestore) bajo el ID de tu club.</p>
                 <ul class="list-disc list-inside space-y-1">
                     <li>**Angeles:** Clave `aguilas2025`</li>
@@ -78,8 +78,8 @@
                 <h1 class="text-3xl font-extrabold text-gray-800">Gestión de Nómina y Atletas</h1>
                 <div class="flex items-center mt-2 md:mt-0">
                     <span class="text-lg font-medium text-gray-600 mr-2">Club Actual:</span>
-                    <span id="currentClubDisplay" class="text-lg font-bold rojo-text py-1 px-3 bg-red-50 rounded-full border rojo-border"></span>
-                    <button onclick="logout()" class="ml-4 text-sm text-gray-500 hover:text-red-600 transition">
+                    <span id="currentClubDisplay" class="text-lg font-bold azul-electrico-text py-1 px-3 bg-blue-50 rounded-full border azul-electrico-border"></span>
+                    <button onclick="logout()" class="ml-4 text-sm text-gray-500 hover:text-blue-600 transition">
                         (Cerrar Sesión)
                     </button>
                 </div>
@@ -93,43 +93,43 @@
 
         <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Formulario de Ingreso de Atleta y Nómina -->
-            <section class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg-vinotinto h-fit">
-                <h2 class="text-xl font-bold mb-4 border-b pb-2 rojo-text">Registro de Nuevo Atleta</h2>
+            <section class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg-azul h-fit">
+                <h2 class="text-xl font-bold mb-4 border-b pb-2 azul-electrico-text">Registro de Nuevo Atleta</h2>
                 <form id="athleteForm" onsubmit="saveAthlete(event)">
 
                     <!-- Datos Personales -->
-                    <h3 class="font-semibold mt-4 mb-2 vinotinto-bg text-white p-2 rounded-md">1. Datos del Atleta</h3>
+                    <h3 class="font-semibold mt-4 mb-2 azul-marino-bg text-white p-2 rounded-md">1. Datos del Atleta</h3>
                     <div class="grid grid-cols-1 gap-4">
-                        <input type="text" id="nombre" placeholder="Nombre" required class="p-2 border rounded-lg focus:ring-rojo-brillante focus:border-rojo-brillante">
-                        <input type="text" id="apellido" placeholder="Apellido" required class="p-2 border rounded-lg focus:ring-rojo-brillante focus:border-rojo-brillante">
+                        <input type="text" id="nombre" placeholder="Nombre" required class="p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico">
+                        <input type="text" id="apellido" placeholder="Apellido" required class="p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico">
                         <div>
                             <label class="block text-xs text-gray-500 mb-1">Fecha de Nacimiento</label>
-                            <input type="date" id="fechaNacimiento" required class="w-full p-2 border rounded-lg focus:ring-rojo-brillante focus:border-rojo-brillante">
+                            <input type="date" id="fechaNacimiento" required class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico">
                         </div>
-                        <input type="tel" id="telefono" placeholder="Teléfono" class="p-2 border rounded-lg focus:ring-rojo-brillante focus:border-rojo-brillante">
+                        <input type="tel" id="telefono" placeholder="Teléfono" class="p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico">
                     </div>
 
                     <!-- Datos Físicos -->
-                    <h3 class="font-semibold mt-6 mb-2 vinotinto-bg text-white p-2 rounded-md">2. Datos Físicos</h3>
+                    <h3 class="font-semibold mt-6 mb-2 azul-marino-bg text-white p-2 rounded-md">2. Datos Físicos</h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="relative">
-                            <input type="number" id="peso" placeholder="Peso" step="0.1" required class="w-full p-2 border rounded-lg focus:ring-rojo-brillante focus:border-rojo-brillante pr-10">
+                            <input type="number" id="peso" placeholder="Peso" step="0.1" required class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico pr-10">
                             <span class="absolute right-0 top-0 mt-2 mr-3 text-gray-500">kg</span>
                         </div>
                         <div class="relative">
-                            <input type="number" id="talla" placeholder="Talla" step="0.01" required class="w-full p-2 border rounded-lg focus:ring-rojo-brillante focus:border-rojo-brillante pr-10">
+                            <input type="number" id="talla" placeholder="Talla" step="0.01" required class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico pr-10">
                             <span class="absolute right-0 top-0 mt-2 mr-3 text-gray-500">m</span>
                         </div>
                     </div>
 
                     <!-- Datos de Nómina -->
-                    <h3 class="font-semibold mt-6 mb-2 vinotinto-bg text-white p-2 rounded-md">3. Datos de Nómina</h3>
+                    <h3 class="font-semibold mt-6 mb-2 azul-marino-bg text-white p-2 rounded-md">3. Datos de Nómina</h3>
                     <div class="grid grid-cols-1 gap-4">
                         <div class="relative">
-                            <input type="number" id="salarioBase" placeholder="Salario Base (USD)" required min="0" step="0.01" class="w-full p-2 border rounded-lg focus:ring-rojo-brillante focus:border-rojo-brillante pr-10">
+                            <input type="number" id="salarioBase" placeholder="Salario Base (USD)" required min="0" step="0.01" class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico pr-10">
                             <span class="absolute right-0 top-0 mt-2 mr-3 text-gray-500">$</span>
                         </div>
-                        <select id="frecuenciaPago" required class="w-full p-2 border rounded-lg focus:ring-rojo-brillante focus:border-rojo-brillante">
+                        <select id="frecuenciaPago" required class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico">
                             <option value="" disabled selected>Frecuencia de Pago</option>
                             <option value="mensual">Mensual</option>
                             <option value="quincenal">Quincenal</option>
@@ -137,7 +137,7 @@
                         </select>
                         <div>
                              <label class="block text-xs text-gray-500 mb-1">Última Fecha de Pago Registrada</label>
-                            <input type="date" id="ultimaFechaPago" class="w-full p-2 border rounded-lg focus:ring-rojo-brillante focus:border-rojo-brillante">
+                            <input type="date" id="ultimaFechaPago" class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico">
                         </div>
                     </div>
                     
@@ -146,7 +146,7 @@
                         Conectando con el servidor...
                     </p>
 
-                    <button type="submit" id="saveButton" class="w-full mt-3 py-3 vinotinto-bg text-white font-semibold rounded-lg vinotinto-hover transition duration-200" disabled>
+                    <button type="submit" id="saveButton" class="w-full mt-3 py-3 azul-marino-bg text-white font-semibold rounded-lg azul-marino-hover transition duration-200" disabled>
                         Guardar Atleta y Nómina
                     </button>
                     <div id="saveMessage" class="text-center mt-3 text-sm hidden"></div>
@@ -156,7 +156,7 @@
             <!-- Tabla de Atletas del Club -->
             <section class="lg:col-span-2">
                 <h2 class="text-xl font-bold mb-4 border-b pb-2 text-gray-800">Atletas Registrados (<span id="athleteCount">0</span>)</h2>
-                <div class="bg-white p-4 rounded-xl shadow-lg-vinotinto overflow-x-auto">
+                <div class="bg-white p-4 rounded-xl shadow-lg-azul overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
@@ -553,7 +553,7 @@
                                 IMC: ${imc}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium rojo-text">${salaryFormatted} (${athlete.frecuenciaPago.charAt(0)})</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium azul-electrico-text">${salaryFormatted} (${athlete.frecuenciaPago.charAt(0)})</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${lastPayment}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <button onclick="deleteAthlete('${athlete.id}', '${athlete.nombre}')" class="text-red-600 hover:text-red-900 transition duration-150">
@@ -591,7 +591,7 @@
                     errorMsg.textContent = `Error al eliminar a ${athleteName}: ${error.message}. Revise la consola.`;
                     errorMsg.className = 'text-red-600 mt-2 text-sm';
                     tableSection.appendChild(errorMsg);
-                    setTimeout(() => errorMsg.remove(), 5000);
+                    setTimeout(() => errorMsg.remove(), 5000); // FIX: Línea de setTimeout completada
                 }
             } else {
                  console.log(`Eliminación de ${athleteName} cancelada.`);
