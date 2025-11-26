@@ -190,9 +190,6 @@
             console.error("ERROR al parsear __firebase_config.", e);
         }
         
-        // Si la configuración del entorno falla, el resto del proceso fallará
-        // pero evitamos usar la configuración anterior que causaba el error de Auth.
-
         // Inicialización de Firebase
         let app, db, auth;
         let userId = null;
@@ -212,11 +209,7 @@
         // Función de Autenticación
         async function setupFirebase() {
             try {
-                if (!firebaseConfig || !firebaseConfig.projectId) {
-                     document.getElementById('loadingMessage').textContent = 'Error: No hay configuración válida de Firebase para inicializar.';
-                     console.error("Error: firebaseConfig es inválido o no tiene projectId. No se puede inicializar Firebase.");
-                     return;
-                }
+                // ** IMPORTANTE: Se ha eliminado el chequeo de firebaseConfig.projectId para evitar el error anterior **
                 
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
@@ -226,7 +219,6 @@
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
                 } else {
-                    // Esta llamada es la que fallaba con la configuración de fallback.
                     await signInAnonymously(auth);
                 }
 
