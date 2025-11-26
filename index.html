@@ -193,17 +193,32 @@
         // --- Configuración de Firebase y Variables Globales ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
-        let firebaseConfig = {};
+        // CONFIGURACIÓN DE FIREBASE (PROYECTO: datacontrolvoley-ff556)
+        let firebaseConfig = {
+            apiKey: "AIzaSyB5RB7mm1j-0gjCNTUEJTkyEqLjyZ3C7ws",
+            authDomain: "datacontrolvoley-ff556.firebaseapp.com",
+            projectId: "datacontrolvoley-ff556",
+            storageBucket: "datacontrolvoley-ff556.firebasestorage.app",
+            messagingSenderId: "516409072606",
+            appId: "1:516409072606:web:132538dba358a077d71b4f" // Usando el ID proporcionado
+        };
+        
+        // El entorno de Canvas inyecta la configuración, pero usamos la tuya como fallback/referencia
         try {
-            // Utilizamos la configuración inyectada por el entorno de Canvas
-            firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+            if (typeof __firebase_config !== 'undefined') {
+                const injectedConfig = JSON.parse(__firebase_config);
+                // Si la configuración inyectada es válida, la usamos
+                if (injectedConfig && injectedConfig.apiKey) {
+                    firebaseConfig = injectedConfig;
+                }
+            }
         } catch (e) {
-            console.error("ERROR al parsear __firebase_config. Usando configuración vacía.", e);
+            console.error("Error al usar la configuración inyectada. Usando la configuración estática proporcionada.", e);
         }
 
         let app, db, auth;
         let userId = null;
-        let isAuthReady = false; // Indica si onAuthStateChanged ha reportado un estado inicial
+        let isAuthReady = false; 
         let isSaving = false; 
         let currentClubId = null;
 
@@ -323,8 +338,7 @@
                     }
                 });
 
-                // Intento de autenticación anónima (usamos directamente signInAnonymously)
-                // Esto reemplaza el uso de __initial_auth_token
+                // Intento de autenticación anónima directa
                 await signInAnonymously(auth);
                 
                 // Nota: El estado final de isAuthReady se gestiona en onAuthStateChanged
@@ -561,6 +575,7 @@
                 return;
             }
 
+            // Usamos prompt en lugar de alert/confirm para la confirmación
             const isConfirmed = prompt(`¿Estás seguro de que deseas eliminar a ${athleteName}? Escribe 'SI' para confirmar.`);
 
             if (isConfirmed && isConfirmed.toUpperCase() === 'SI') {
@@ -585,6 +600,3 @@
     </script>
 </body>
 </html>
-
-
-
