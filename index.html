@@ -62,6 +62,7 @@
                     <li>**Pumas de Voleibol:** Clave `pumas2025`</li>
                     <li>**Estrellas de Voleibol:** Clave `estrellas2025`</li>
                 </ul>
+                <p class="mt-3 text-red-600 font-semibold">ADVERTENCIA: La base de datos no está conectada. Los datos NO se guardarán.</p>
             </div>
         </div>
     </div>
@@ -181,10 +182,24 @@
         // Determinar la configuración a usar SÓLO DEL ENTORNO
         let firebaseConfig = {};
         try {
-            // Intentar usar la configuración del entorno
+            // 1. Intentar usar la configuración del entorno
             firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         } catch (e) {
             console.error("ERROR al parsear __firebase_config. Usando configuración vacía.", e);
+        }
+
+        // 2. *** CRÍTICO: Inyectar una configuración simulada si la real está vacía ***
+        if (Object.keys(firebaseConfig).length === 0) {
+            console.warn("ADVERTENCIA: La configuración de Firebase está vacía. Usando credenciales simuladas para evitar fallos de inicialización. Los datos NO se guardarán.");
+            // Esta es una configuración ficticia que permite que initializeApp no falle por un objeto vacío.
+            firebaseConfig = {
+                apiKey: "MOCK_API_KEY",
+                authDomain: "mock-project.firebaseapp.com",
+                projectId: "mock-project-id",
+                storageBucket: "mock-project.appspot.com",
+                messagingSenderId: "123456789012",
+                appId: "1:123456789012:web:a1b2c3d4e5f6g7h8i9j0"
+            };
         }
         
         // Inicialización de Firebase
@@ -205,17 +220,8 @@
 
         // Función de Autenticación
         async function setupFirebase() {
-            // CRÍTICO: Verificar si la configuración es válida antes de inicializar
-            if (Object.keys(firebaseConfig).length === 0) {
-                console.error("FALLO CRÍTICO: La configuración de Firebase está vacía. La aplicación no podrá guardar ni cargar datos.");
-                document.getElementById('loadingMessage').textContent = 'ADVERTENCIA: Conexión a Base de Datos fallida (Configuración vacía).';
-                db = null;
-                auth = null;
-                isAuthReady = true; // Permite que la interfaz cargue sin errores
-                return; // Detener la inicialización
-            }
-            
             try {
+                // Se ejecuta con la configuración real o la simulada
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
@@ -244,7 +250,7 @@
 
             } catch (error) {
                 console.error("Error al inicializar o autenticar Firebase:", error);
-                document.getElementById('loadingMessage').textContent = `Error CRÍTICO al inicializar Firebase: ${error.code || error.message}. Revise la consola.`;
+                document.getElementById('loadingMessage').textContent = `Error al inicializar Firebase: ${error.code || error.message}. Revise la consola.`;
                 db = null;
                 auth = null;
                 isAuthReady = true;
@@ -318,7 +324,7 @@
 
             // **VERIFICACIÓN CRÍTICA PARA ASINCRONÍA: Asegura que Firebase y DB estén listos**
             if (!isAuthReady || !db) {
-                alertUser('Error: La base de datos no está disponible. Revise la configuración de Firebase en la consola.', 'error');
+                alertUser('Error: La base de datos no está disponible. Inicialización fallida o se usa configuración simulada.', 'error');
                 console.error("Firebase o Autenticación no está lista para la escritura.");
                 return;
             }
@@ -363,8 +369,8 @@
                 document.getElementById('athleteForm').reset();
             } catch (error) {
                 console.error("Error al guardar atleta en Firestore:", error);
-                // Mostrar un mensaje de error detallado si algo falla
-                alertUser(`Error al guardar: ${error.message}. Revisa la consola para más detalles.`, 'error');
+                // Mostrar un mensaje de error detallado si algo falla (p.ej., permisos con la mock config)
+                alertUser(`Error al guardar: ${error.message}. Es probable que se deba a la configuración simulada.`, 'error');
             } finally {
                 isSaving = false;
                 document.getElementById('saveButton').textContent = 'Guardar Atleta y Nómina';
@@ -375,7 +381,10 @@
         window.loadAthletes = function() {
             // **VERIFICACIÓN CRÍTICA PARA ASINCRONÍA**
             if (!isAuthReady || !currentClubId || !db) {
-                document.getElementById('loadingMessage').textContent = 'ADVERTENCIA: No se puede conectar a la Base de Datos para cargar atletas.';
+                document.getElementById('loadingMessage').textContent = 'ADVERTENCIA: Base de Datos no disponible (simulación activa).';
+                // Si la DB no está lista, simulamos que la carga ha terminado.
+                document.getElementById('athleteCount').textContent = '0 (Simulación)';
+                document.getElementById('athletesTableBody').innerHTML = '';
                 return;
             }
 
@@ -429,13 +438,13 @@
                 });
             }, (error) => {
                 console.error("Error al escuchar datos:", error);
-                document.getElementById('loadingMessage').textContent = 'Error al cargar datos. Revisa la consola.';
+                document.getElementById('loadingMessage').textContent = `Error al cargar datos. ${error.message}. Revisa la consola.`;
             });
         }
         
         window.deleteAthlete = async function(id) {
              if (!isAuthReady || !db) {
-                alertUser('Error: La base de datos no está disponible. Revise la configuración de Firebase en la consola.', 'error');
+                alertUser('Error: La base de datos no está disponible. Inicialización fallida o se usa configuración simulada.', 'error');
                 return;
             }
             
@@ -462,7 +471,7 @@
                     alertUser('Atleta eliminado correctamente.', 'success');
                 } catch (error) {
                     console.error("Error al eliminar atleta:", error);
-                    alertUser('Error al eliminar. Revisa la consola.', 'error');
+                    alertUser(`Error al eliminar: ${error.message}. Es probable que se deba a la configuración simulada.`, 'error');
                 }
             };
         }
