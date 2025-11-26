@@ -28,6 +28,9 @@
             -webkit-appearance: none; 
             margin: 0; 
         }
+        /* Estilo para el indicador de guardado */
+        #saveMessage.success { color: green; }
+        #saveMessage.error { color: red; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -56,8 +59,8 @@
 
             <!-- Claves de Ejemplo para Pruebas -->
             <div class="mt-8 p-4 bg-red-50 rounded-lg text-xs text-gray-600">
-                <p class="font-bold mb-2 text-red-800">MODO SIMULACIÓN ACTIVO</p>
-                <p class="mb-2">Utiliza estas claves para acceder a los datos simulados de cada club. Los datos no se guardarán permanentemente.</p>
+                <p class="font-bold mb-2 text-red-800">CLAVES DE ACCESO DE PRUEBA</p>
+                <p class="mb-2">Los datos que registres SÍ se guardarán en tu base de datos (Firestore) bajo el ID de tu club.</p>
                 <ul class="list-disc list-inside space-y-1">
                     <li>**Águilas de Voleibol:** Clave `aguilas2025`</li>
                     <li>**Pumas de Voleibol:** Clave `pumas2025`</li>
@@ -147,8 +150,8 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Nac.</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peso/Talla</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Edad</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Físico (IMC)</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Salario</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Últ. Pago</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
@@ -167,7 +170,6 @@
     <!-- Script de Firebase y Lógica -->
     <script type="module">
         // Importaciones de Firebase SDK (v11.6.1)
-        // Se importan, pero se usarán solo si NO estamos en modo simulación
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, addDoc, onSnapshot, collection, query, where, deleteDoc, setLogLevel, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -176,8 +178,6 @@
         setLogLevel('Debug');
 
         // --- Configuración de Firebase y Variables Globales ---
-        const MOCK_API_KEY = "MOCK_API_KEY"; // Clave de simulación
-
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
@@ -188,31 +188,11 @@
             console.error("ERROR al parsear __firebase_config. Usando configuración vacía.", e);
         }
 
-        // 2. CRÍTICO: Inyectar una configuración simulada si la real está vacía
-        let isSimulationMode = false;
-        if (Object.keys(firebaseConfig).length === 0) {
-            console.warn("ADVERTENCIA: Configuración vacía. Activando MODO SIMULACIÓN.");
-            isSimulationMode = true;
-            firebaseConfig = { apiKey: MOCK_API_KEY }; // Configuración mínima para initializeApp
-        } else if (firebaseConfig.apiKey === MOCK_API_KEY) {
-             // Si por alguna razón la mock key persiste, también activamos la simulación
-            isSimulationMode = true;
-        }
-
         let app, db, auth;
         let userId = null;
         let isAuthReady = false;
         let isSaving = false; 
         let currentClubId = null;
-
-        // *** Almacenamiento Simulado (Solo para MODO SIMULACIÓN) ***
-        let mockAthletes = [
-            // Datos de ejemplo para Águilas
-            { id: 'mock-1', clubId: 'Águilas de Voleibol', nombre: 'Carlos', apellido: 'Gómez', fechaNacimiento: '1995-05-20', telefono: '555-1234', peso: 85.5, talla: 1.95, salarioBase: 1200.00, frecuenciaPago: 'mensual', ultimaFechaPago: '2025-11-01' },
-            { id: 'mock-2', clubId: 'Águilas de Voleibol', nombre: 'María', apellido: 'Pérez', fechaNacimiento: '1998-08-10', telefono: '555-5678', peso: 65.0, talla: 1.70, salarioBase: 800.00, frecuenciaPago: 'quincenal', ultimaFechaPago: '2025-11-15' },
-            // Datos de ejemplo para Pumas
-            { id: 'mock-3', clubId: 'Pumas de Voleibol', nombre: 'Ricardo', apellido: 'López', fechaNacimiento: '2000-01-01', telefono: '555-9012', peso: 78.2, talla: 1.80, salarioBase: 950.00, frecuenciaPago: 'semanal', ultimaFechaPago: '2025-11-22' }
-        ];
 
         // Simulación de Claves de Club
         const clubCredentials = {
@@ -221,38 +201,72 @@
             'Estrellas de Voleibol': 'estrellas2025'
         };
         
-        // --- Inicialización y Autenticación ---
+        // --- Funciones de Utilidad ---
+
+        // Función para calcular la edad a partir de la fecha de nacimiento (YYYY-MM-DD)
+        function calculateAge(dateOfBirth) {
+            const dob = new Date(dateOfBirth);
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const monthDifference = today.getMonth() - dob.getMonth();
+            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dob.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        // Función para calcular el Índice de Masa Corporal (peso en kg, talla en metros)
+        function calculateIMC(peso, talla) {
+            // IMC = peso / (talla * talla)
+            if (talla > 0) {
+                const imc = peso / (talla * talla);
+                return imc.toFixed(2); // Redondear a 2 decimales
+            }
+            return 'N/A';
+        }
+
+        // Función para determinar el estado de peso (basado en la clasificación estándar)
+        function getIMCStatus(imc) {
+            const imcValue = parseFloat(imc);
+            if (isNaN(imcValue)) return 'bg-gray-200 text-gray-800';
+            
+            if (imcValue < 18.5) return 'bg-blue-200 text-blue-800'; // Bajo peso
+            if (imcValue >= 18.5 && imcValue < 25) return 'bg-green-200 text-green-800'; // Normal
+            if (imcValue >= 25 && imcValue < 30) return 'bg-yellow-200 text-yellow-800'; // Sobrepeso
+            return 'bg-red-200 text-red-800'; // Obesidad (>= 30)
+        }
+
+        // --- Inicialización y Autenticación de Firebase ---
 
         async function setupFirebase() {
             try {
-                // 1. Inicializar Firebase (Solo necesita la config mock para evitar el error)
-                app = initializeApp(firebaseConfig);
-                
-                if (isSimulationMode) {
-                    console.log("MODO SIMULACIÓN: Saltando Autenticación de Firebase.");
-                    userId = 'mock-user-id'; // Asignar un ID simulado
-                    isAuthReady = true;
-                    document.getElementById('loadingMessage').textContent = 'MODO SIMULACIÓN ACTIVO. Datos no persistentes.';
-                    return; // SALIR DE LA FUNCIÓN, NO CONTACTAR A GOOGLE
+                // Verificar si la configuración es válida (asumimos que Canvas la proporciona)
+                if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
+                    console.error("Firebase no inicializado: La configuración es inválida o no está presente.");
+                    document.getElementById('loadingMessage').textContent = 'Error: Firebase no pudo inicializarse. Revise la consola.';
+                    return;
                 }
 
-                // --- Lógica REAL de Firebase (Solo si no es simulación) ---
+                // 1. Inicializar Firebase
+                app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
 
+                // 2. Autenticación (con token o anónima si no hay token)
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
                 } else {
                     await signInAnonymously(auth);
                 }
 
+                // 3. Listener de estado de autenticación
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         userId = user.uid;
                         isAuthReady = true;
                         console.log("Firebase Auth listo. UserID:", userId);
                         if (currentClubId) {
-                            loadAthletes();
+                            loadAthletes(); // Cargar datos si el club ya está seleccionado
                         }
                     } else {
                         isAuthReady = true; 
@@ -261,11 +275,8 @@
                 });
 
             } catch (error) {
-                // Si falla por API key, pero la config no era mock, es un error real de setup.
                 console.error("Error CRÍTICO al inicializar o autenticar Firebase:", error);
                 document.getElementById('loadingMessage').textContent = `Error CRÍTICO de Firebase: ${error.code || error.message}. Revise la consola.`;
-                db = null;
-                auth = null;
                 isAuthReady = true;
             }
         }
@@ -291,6 +302,8 @@
                 // Cargar datos
                 if (isAuthReady) {
                     loadAthletes();
+                } else {
+                    document.getElementById('loadingMessage').textContent = 'Autenticando Firebase, por favor espere...';
                 }
 
             } else {
@@ -308,227 +321,181 @@
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('clubKeyInput').value = '';
             document.getElementById('clubNameInput').value = '';
-            document.getElementById('athletesTableBody').innerHTML = '';
+            document.getElementById('athletesTableBody').innerHTML = ''; // Limpiar tabla
             document.getElementById('athleteCount').textContent = '0';
         }
 
-        // --- Funciones de CRUD (Simuladas o Reales) ---
+        // --- Funciones de Datos (Firestore) ---
 
-        // Función para renderizar la tabla con los datos actuales
-        function renderAthletes(athletes) {
-            const athletesTableBody = document.getElementById('athletesTableBody');
-            athletesTableBody.innerHTML = '';
-            
-            // Ordenar atletas por nombre (client-side)
-            athletes.sort((a, b) => a.nombre.localeCompare(b.nombre));
-
-            athletes.forEach(athlete => {
-                const row = athletesTableBody.insertRow();
-                row.className = 'hover:bg-gray-50';
-
-                const pesoTalla = `${athlete.peso} kg / ${athlete.talla} m`;
-                const salario = `$${athlete.salarioBase.toFixed(2)} (${athlete.frecuenciaPago})`;
-                const ultimaPago = athlete.ultimaFechaPago || 'N/A';
-
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${athlete.nombre} ${athlete.apellido}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${athlete.fechaNacimiento}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${pesoTalla}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${salario}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        ${ultimaPago}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button onclick="deleteAthlete('${athlete.id}')" class="text-red-600 hover:text-red-900 ml-2">Eliminar</button>
-                    </td>
-                `;
-            });
-            document.getElementById('athleteCount').textContent = athletes.length;
-            document.getElementById('loadingMessage').textContent = athletes.length === 0 
-                ? 'No hay atletas registrados para este club.' 
-                : '';
-        }
-
+        /**
+         * Guarda un nuevo atleta en Firestore en la colección pública del club.
+         */
         window.saveAthlete = async function(event) {
             event.preventDefault();
+            if (isSaving || !currentClubId || !isAuthReady || !db) return;
 
-            if (isSaving) {
-                alertUser('Guardando datos, por favor espera...', 'error');
-                return;
-            }
-            if (!currentClubId) {
-                alertUser('Error: Club no autenticado. Por favor, inicia sesión.', 'error');
-                return;
-            }
-
+            const saveButton = document.getElementById('saveButton');
+            const saveMessage = document.getElementById('saveMessage');
+            
+            saveMessage.classList.add('hidden');
+            saveButton.disabled = true;
+            saveButton.textContent = 'Guardando...';
             isSaving = true;
-            document.getElementById('saveButton').textContent = 'Guardando...';
-            document.getElementById('saveButton').disabled = true;
-
-            const nombre = document.getElementById('nombre').value;
-            const apellido = document.getElementById('apellido').value;
-            const fechaNacimiento = document.getElementById('fechaNacimiento').value;
-            const telefono = document.getElementById('telefono').value;
-            const peso = parseFloat(document.getElementById('peso').value);
-            const talla = parseFloat(document.getElementById('talla').value);
-            const salarioBase = parseFloat(document.getElementById('salarioBase').value);
-            const frecuenciaPago = document.getElementById('frecuenciaPago').value;
-            const ultimaFechaPago = document.getElementById('ultimaFechaPago').value;
-                
-            const athleteData = {
-                clubId: currentClubId,
-                nombre,
-                apellido,
-                fechaNacimiento,
-                telefono,
-                peso,
-                talla,
-                salarioBase,
-                frecuenciaPago,
-                ultimaFechaPago: ultimaFechaPago || null,
-            };
 
             try {
-                if (isSimulationMode) {
-                    // *** MODO SIMULACIÓN: Guardar en array local ***
-                    athleteData.id = 'mock-' + Date.now();
-                    mockAthletes.push(athleteData);
-                    loadAthletes(); // Recargar tabla desde mock data
-                    alertUser('Atleta y datos de nómina guardados temporalmente.', 'success');
-                } else {
-                    // --- Lógica REAL de Firestore ---
-                     if (!isAuthReady || !db) {
-                        alertUser('Error: La base de datos real no está lista.', 'error');
-                        return;
-                    }
-                    const path = `artifacts/${appId}/public/data/athletes`;
-                    await addDoc(collection(db, path), { ...athleteData, createdAt: serverTimestamp() });
-                    alertUser('Atleta y datos de nómina guardados correctamente en Firestore.', 'success');
-                }
+                // Recolectar datos del formulario
+                const athleteData = {
+                    clubId: currentClubId, // Clave para el filtro multi-club
+                    nombre: document.getElementById('nombre').value.trim(),
+                    apellido: document.getElementById('apellido').value.trim(),
+                    fechaNacimiento: document.getElementById('fechaNacimiento').value,
+                    telefono: document.getElementById('telefono').value.trim(),
+                    peso: parseFloat(document.getElementById('peso').value),
+                    talla: parseFloat(document.getElementById('talla').value),
+                    salarioBase: parseFloat(document.getElementById('salarioBase').value),
+                    frecuenciaPago: document.getElementById('frecuenciaPago').value,
+                    ultimaFechaPago: document.getElementById('ultimaFechaPago').value || '',
+                    createdAt: serverTimestamp(),
+                    userId: userId, // ID del usuario que registra
+                };
+
+                // Ruta de la colección pública para datos compartidos entre usuarios del mismo club
+                const publicCollectionPath = `artifacts/${appId}/public/data/athletes`;
+
+                // Agregar el documento a Firestore
+                await addDoc(collection(db, publicCollectionPath), athleteData);
+
+                // Mensaje de éxito
+                saveMessage.textContent = `Atleta ${athleteData.nombre} registrado con éxito.`;
+                saveMessage.classList.remove('hidden');
+                saveMessage.classList.remove('error');
+                saveMessage.classList.add('success');
                 
-                document.getElementById('athleteForm').reset();
+                document.getElementById('athleteForm').reset(); // Limpiar formulario
+
             } catch (error) {
-                console.error("Error al guardar atleta:", error);
-                alertUser(`Error al guardar: ${error.message}.`, 'error');
+                console.error("Error al guardar el atleta en Firestore:", error);
+                saveMessage.textContent = 'Error al guardar. Revise la consola.';
+                saveMessage.classList.remove('hidden');
+                saveMessage.classList.remove('success');
+                saveMessage.classList.add('error');
             } finally {
+                saveButton.textContent = 'Guardar Atleta y Nómina';
+                saveButton.disabled = false;
                 isSaving = false;
-                document.getElementById('saveButton').textContent = 'Guardar Atleta y Nómina';
-                document.getElementById('saveButton').disabled = false;
             }
         }
         
-        window.loadAthletes = function() {
-            document.getElementById('loadingMessage').textContent = 'Cargando datos...';
+        /**
+         * Carga los atletas del club actual en tiempo real usando onSnapshot.
+         */
+        function loadAthletes() {
+            if (!isAuthReady || !currentClubId || !db) return;
 
-            if (isSimulationMode) {
-                // *** MODO SIMULACIÓN: Cargar desde array local ***
-                const clubAthletes = mockAthletes.filter(a => a.clubId === currentClubId);
-                renderAthletes(clubAthletes);
-                document.getElementById('loadingMessage').textContent = 'MODO SIMULACIÓN ACTIVO. Los datos no persisten.';
-                return;
-            }
+            document.getElementById('loadingMessage').textContent = `Cargando atletas de ${currentClubId}...`;
             
-            // --- Lógica REAL de Firestore ---
-            if (!isAuthReady || !currentClubId || !db) {
-                document.getElementById('loadingMessage').textContent = 'Esperando conexión segura con la Base de Datos...';
-                return;
-            }
-
-            const path = `artifacts/${appId}/public/data/athletes`;
-            const athletesCollection = collection(db, path); 
-
+            // Ruta de la colección pública
+            const publicCollectionPath = `artifacts/${appId}/public/data/athletes`;
             const q = query(
-                athletesCollection,
-                where("clubId", "==", currentClubId) 
+                collection(db, publicCollectionPath),
+                where('clubId', '==', currentClubId)
             );
 
-            // Escucha en tiempo real de los datos del club actual
+            // Listener en tiempo real
             onSnapshot(q, (snapshot) => {
                 const athletes = [];
-
                 snapshot.forEach((doc) => {
                     athletes.push({ id: doc.id, ...doc.data() });
                 });
+                
+                // Ordenar por nombre antes de renderizar (opcional)
+                athletes.sort((a, b) => a.nombre.localeCompare(b.nombre));
 
-                renderAthletes(athletes);
+                renderAthletesTable(athletes);
+                document.getElementById('athleteCount').textContent = athletes.length;
+                document.getElementById('loadingMessage').textContent = ''; // Ocultar mensaje de carga
             }, (error) => {
-                console.error("Error al escuchar datos de Firestore:", error);
-                document.getElementById('loadingMessage').textContent = `Error al cargar datos. ${error.message}. Revisa la consola.`;
+                console.error("Error al escuchar cambios en Firestore:", error);
+                document.getElementById('loadingMessage').textContent = 'Error al cargar los datos en tiempo real.';
             });
         }
         
-        window.deleteAthlete = async function(id) {
-            // Confirmación de eliminación (manteniendo el modal)
-            const confirmation = createConfirmModal('¿Estás seguro de que deseas eliminar este atleta?', async () => {
+        /**
+         * Renderiza los atletas en la tabla HTML.
+         */
+        function renderAthletesTable(athletes) {
+            const tableBody = document.getElementById('athletesTableBody');
+            tableBody.innerHTML = ''; 
+
+            if (athletes.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">No hay atletas registrados para este club.</td></tr>';
+                return;
+            }
+
+            athletes.forEach(athlete => {
+                const imc = calculateIMC(athlete.peso, athlete.talla);
+                const imcStatusClass = getIMCStatus(imc);
+                const age = calculateAge(athlete.fechaNacimiento);
+                
+                // Formato de salario
+                const salaryFormatted = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                }).format(athlete.salarioBase);
+
+                // Ultima Fecha de Pago
+                const lastPayment = athlete.ultimaFechaPago || 'N/A';
+                
+                const row = `
+                    <tr class="hover:bg-gray-100 transition duration-150">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            ${athlete.nombre} ${athlete.apellido}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${age} años</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${imcStatusClass}">
+                                IMC: ${imc}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium rojo-text">${salaryFormatted} (${athlete.frecuenciaPago.charAt(0)})</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${lastPayment}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="deleteAthlete('${athlete.id}', '${athlete.nombre}')" class="text-red-600 hover:text-red-900 transition duration-150">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+        
+        /**
+         * Elimina un atleta de Firestore.
+         */
+        window.deleteAthlete = async function(athleteId, athleteName) {
+             // Reemplazamos alert() con una función para simular un modal/confirmación
+            const isConfirmed = prompt(`¿Estás seguro de que deseas eliminar a ${athleteName}? Escribe 'SI' para confirmar.`);
+
+            if (isConfirmed && isConfirmed.toUpperCase() === 'SI' && db) {
                 try {
-                    if (isSimulationMode) {
-                        // *** MODO SIMULACIÓN: Eliminar de array local ***
-                        const initialLength = mockAthletes.length;
-                        mockAthletes = mockAthletes.filter(a => a.id !== id);
-                        if (mockAthletes.length < initialLength) {
-                            loadAthletes(); 
-                            alertUser('Atleta eliminado temporalmente.', 'success');
-                        } else {
-                            alertUser('Error: Atleta no encontrado en la simulación.', 'error');
-                        }
-
-                    } else {
-                        // --- Lógica REAL de Firestore ---
-                        if (!isAuthReady || !db) {
-                            alertUser('Error: La base de datos real no está disponible.', 'error');
-                            return;
-                        }
-                        const path = `artifacts/${appId}/public/data/athletes`;
-                        await deleteDoc(doc(db, path, id));
-                        alertUser('Atleta eliminado correctamente de Firestore.', 'success');
-                    }
+                    const publicCollectionPath = `artifacts/${appId}/public/data/athletes`;
+                    await deleteDoc(doc(db, publicCollectionPath, athleteId));
+                    console.log(`Atleta ${athleteId} eliminado con éxito.`);
                 } catch (error) {
-                    console.error("Error al eliminar atleta:", error);
-                    alertUser(`Error al eliminar: ${error.message}.`, 'error');
+                    console.error("Error al eliminar el atleta:", error);
+                    // Usar un mensaje temporal en la UI
+                    const tableSection = document.querySelector('section.lg\\:col-span-2');
+                    const errorMsg = document.createElement('p');
+                    errorMsg.textContent = `Error al eliminar a ${athleteName}: ${error.message}`;
+                    errorMsg.className = 'text-red-600 mt-2 text-sm';
+                    tableSection.appendChild(errorMsg);
+                    setTimeout(() => errorMsg.remove(), 5000);
                 }
-            });
-            document.body.appendChild(confirmation);
+            } else {
+                 console.log(`Eliminación de ${athleteName} cancelada.`);
+            }
         }
-
-
-        // --- Utilidades ---
-        function alertUser(message, type) {
-            const saveMessage = document.getElementById('saveMessage');
-            saveMessage.textContent = message;
-            saveMessage.classList.remove('hidden', 'text-green-600', 'text-red-600');
-            saveMessage.classList.add(type === 'success' ? 'text-green-600' : 'text-red-600');
-            
-            saveMessage.classList.remove('hidden');
-            
-            setTimeout(() => { 
-                saveMessage.classList.add('hidden'); 
-            }, 4000);
-        }
-        
-        function createConfirmModal(message, onConfirm) {
-            const confirmation = document.createElement('div');
-            confirmation.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-            confirmation.innerHTML = `
-                <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full text-center">
-                    <h3 class="text-lg font-bold mb-4 rojo-text">Confirmar Acción</h3>
-                    <p class="mb-6 text-gray-700">${message}</p>
-                    <div class="flex justify-center space-x-3">
-                        <button id="cancelAction" class="py-2 px-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition">Cancelar</button>
-                        <button id="confirmAction" class="py-2 px-4 vinotinto-bg text-white rounded-lg vinotinto-hover transition">Confirmar</button>
-                    </div>
-                </div>
-            `;
-
-            confirmation.querySelector('#cancelAction').onclick = () => document.body.removeChild(confirmation);
-            confirmation.querySelector('#confirmAction').onclick = () => {
-                document.body.removeChild(confirmation);
-                onConfirm();
-            };
-            
-            return confirmation;
-        }
-
-
     </script>
 </body>
 </html>
