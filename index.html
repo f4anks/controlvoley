@@ -140,7 +140,7 @@
                         </div>
                     </div>
                     
-                    <!-- Indicador de estado de conexión -->
+                    <!-- Indicador de estado de conexión MEJORADO -->
                     <p id="connectionStatus" class="mt-4 text-sm text-center font-medium text-yellow-600">
                         Conectando con el servidor...
                     </p>
@@ -204,7 +204,7 @@
 
         let app, db, auth;
         let userId = null;
-        let isAuthReady = false;
+        let isAuthReady = false; // Indica si onAuthStateChanged ha reportado un estado inicial
         let isSaving = false; 
         let currentClubId = null;
 
@@ -221,20 +221,32 @@
         
         // --- Funciones de Utilidad ---
 
+        /**
+         * Actualiza el estado del botón Guardar y el mensaje de conexión.
+         * Esta función ha sido mejorada para detectar fallos de autenticación.
+         */
         function updateSaveButtonState() {
-            if (currentClubId && isAuthReady && db && userId) {
+            if (!currentClubId) {
+                // Estado 0: No hay club seleccionado
+                saveButton.disabled = true;
+                connectionStatusElement.textContent = 'Por favor, inicie sesión primero.';
+                connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-gray-600';
+            } else if (!isAuthReady) {
+                // Estado 1: Inicializando Firebase
+                saveButton.disabled = true;
+                connectionStatusElement.textContent = 'Conectando con el servidor...';
+                connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-yellow-600';
+            } else if (isAuthReady && db && userId) {
+                // Estado 2: Conexión y Autenticación ÉXITOSAS
                 saveButton.disabled = false;
                 connectionStatusElement.textContent = '¡Conexión lista! Puede guardar datos.';
                 connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-green-600';
             } else {
+                // Estado 3: Autenticación Fallida (userId es null, pero ya se completó el chequeo)
                 saveButton.disabled = true;
-                if (!currentClubId) {
-                    connectionStatusElement.textContent = 'Por favor, inicie sesión primero.';
-                    connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-gray-600';
-                } else {
-                    connectionStatusElement.textContent = 'Conectando con el servidor...';
-                    connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-yellow-600';
-                }
+                connectionStatusElement.textContent = 'ERROR: Autenticación fallida. No se puede escribir en Firestore.';
+                connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-red-600';
+                console.error("Autenticación fallida o userId es null. Verifique las reglas de seguridad de Firestore.");
             }
         }
 
@@ -280,6 +292,8 @@
                 if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
                     authStatusElement.textContent = 'ERROR: Configuración vacía';
                     document.getElementById('loadingMessage').textContent = 'Error: Firebase no pudo inicializarse (configuración inválida).';
+                    isAuthReady = true;
+                    updateSaveButtonState();
                     return;
                 }
 
@@ -287,16 +301,9 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
 
-                // Autenticación
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                // Listener de estado de autenticación
+                // Configurar el listener de estado ANTES del intento de sign-in (Mejor Práctica)
                 onAuthStateChanged(auth, (user) => {
-                    isAuthReady = true;
+                    isAuthReady = true; // Se establece a TRUE en el momento que Firebase reporta el estado inicial (éxito o fallo)
                     if (user) {
                         userId = user.uid;
                         authStatusElement.textContent = 'Conectado';
@@ -307,18 +314,29 @@
                         authStatusElement.textContent = 'Anónimo/Desconectado';
                         console.log("Sesión anónima/no autenticada.");
                     }
-                    updateSaveButtonState(); // Habilitar/deshabilitar botón
+                    
+                    updateSaveButtonState(); // Habilitar/deshabilitar botón con el estado final
                     
                     if (currentClubId) {
-                        loadAthletes(); // Cargar datos si el club ya está seleccionado
+                        loadAthletes(); // Cargar datos si el club ya está seleccionado y la autenticación terminó
                     }
                 });
+
+                // Intento de autenticación usando el token o anónimamente
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                // Nota: El estado final de isAuthReady se gestiona en onAuthStateChanged
 
             } catch (error) {
                 console.error("Error CRÍTICO al inicializar o autenticar Firebase:", error);
                 authStatusElement.textContent = 'ERROR Crítico';
                 document.getElementById('loadingMessage').textContent = `Error CRÍTICO de Firebase: ${error.code || error.message}. Revise la consola.`;
                 isAuthReady = true;
+                userId = null; // Forzar a null si la autenticación falla por error crítico
                 updateSaveButtonState();
             }
         }
@@ -344,7 +362,7 @@
                 
                 updateSaveButtonState(); // Actualizar estado de conexión/guardado
                 
-                // Cargar datos si Firebase ya está listo, si no, se cargarán al terminar onAuthStateChanged
+                // Cargar datos si Firebase ya está listo (isAuthReady), si no, se cargarán al terminar onAuthStateChanged
                 if (isAuthReady && db) {
                     loadAthletes();
                 } else {
@@ -379,10 +397,11 @@
         window.saveAthlete = async function(event) {
             event.preventDefault();
             
-            // Guardia de conexión principal mejorada
+            // Guardia de conexión principal mejorada: solo permite guardar si hay club, DB, usuario y no está guardando
             if (isSaving || saveButton.disabled || !currentClubId || !db || !userId) {
-                document.getElementById('saveMessage').textContent = 'Error: Base de datos no lista o no autenticado. Espere y vuelva a intentarlo.';
-                document.getElementById('saveMessage').classList.remove('hidden');
+                // Mostrar el mismo error de la UI en el mensaje de guardado si el botón estaba deshabilitado
+                document.getElementById('saveMessage').textContent = connectionStatusElement.textContent;
+                document.getElementById('saveMessage').classList.remove('hidden', 'success');
                 document.getElementById('saveMessage').classList.add('error');
                 return;
             }
