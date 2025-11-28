@@ -107,6 +107,8 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Físico (IMC)</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Salario</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Últ. Pago</th>
+                            <!-- NUEVA COLUMNA DE STATUS -->
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                         </tr>
                     </thead>
@@ -169,7 +171,7 @@
                     <h3 class="font-semibold mt-6 mb-2 azul-marino-bg text-white p-2 rounded-md">3. Datos de Nómina</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="relative">
-                            <!-- CAMBIO REALIZADO AQUÍ: Reemplazo 'salarioBase' por 'montoPago' y el placeholder -->
+                            <!-- ID y Placeholder actualizado a "Monto del Pago (USD)" -->
                             <input type="number" id="montoPago" placeholder="Monto del Pago (USD)" required min="0" step="0.01" class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico pr-10">
                             <span class="absolute right-0 top-0 mt-2 mr-3 text-gray-500">$</span>
                         </div>
@@ -323,6 +325,49 @@
             if (imcValue >= 25 && imcValue < 30) return 'bg-yellow-200 text-yellow-800'; 
             return 'bg-red-200 text-red-800'; 
         }
+
+        /**
+         * Calcula el estado de pago basándose en la última fecha de pago.
+         * Status: Solvente (< 23 días), Por Vencer (23-30 días), Vencido (> 30 días).
+         */
+        function getPaymentStatus(lastPaymentDateStr) {
+            if (!lastPaymentDateStr || lastPaymentDateStr === 'N/A') {
+                return { status: 'Pendiente', class: 'bg-gray-400 text-white' };
+            }
+
+            const lastPayment = new Date(lastPaymentDateStr);
+            const today = new Date();
+            
+            // Ajustar para comparar solo días
+            lastPayment.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
+
+            const diffTime = today.getTime() - lastPayment.getTime();
+            // Calcula días transcurridos. Usa Math.floor para ser más estricto con días exactos.
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
+
+            let status = '';
+            let statusClass = '';
+
+            if (diffDays > 30) {
+                status = 'Vencido';
+                statusClass = 'bg-red-500 text-white font-bold';
+            } else if (diffDays >= 23 && diffDays <= 30) {
+                status = 'Por Vencer';
+                statusClass = 'bg-yellow-400 text-gray-900 font-bold';
+            } else if (diffDays >= 0) {
+                // Incluye el día de hoy hasta 22 días antes.
+                status = 'Solvente';
+                statusClass = 'bg-green-500 text-white font-bold';
+            } else {
+                 // Si la fecha de pago es futura (error de ingreso)
+                status = 'Futuro'; 
+                statusClass = 'bg-blue-500 text-white';
+            }
+
+            return { status, class: statusClass };
+        }
+
 
         // --- Inicialización y Autenticación de Firebase ---
 
@@ -554,7 +599,7 @@
             tableBody.innerHTML = ''; 
 
             if (athletes.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">No hay atletas registrados para este club. ¡Regista uno nuevo!</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">No hay atletas registrados para este club. ¡Regista uno nuevo!</td></tr>';
                 return;
             }
 
@@ -573,6 +618,10 @@
 
                 const lastPayment = athlete.ultimaFechaPago || 'N/A';
                 
+                // CÁLCULO DEL STATUS DE PAGO
+                const paymentStatus = getPaymentStatus(lastPayment);
+
+
                 const row = `
                     <tr class="hover:bg-gray-100 transition duration-150">
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -586,6 +635,12 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium azul-electrico-text">${salaryFormatted} (${athlete.frecuenciaPago.charAt(0)})</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${lastPayment}</td>
+                        <!-- CELDA DE STATUS -->
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatus.class}">
+                                ${paymentStatus.status}
+                            </span>
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <button onclick="deleteAthlete('${athlete.id}', '${athlete.nombre}')" class="text-red-600 hover:text-red-900 transition duration-150">
                                 Eliminar
