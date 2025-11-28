@@ -123,13 +123,17 @@
 
         <!-- VIEW 2: Formulario de Ingreso (Simula atletas_edit.html) -->
         <div id="form-edit-view" class="main-view hidden">
-            <!-- BOTÓN DE REGRESO (Se mantiene y se mejora el estilo de navegación) -->
-            <button onclick="navigateTo('table')" class="mb-6 inline-flex items-center text-base font-bold text-gray-700 hover:text-azul-electrico transition border-b border-transparent hover:border-azul-electrico pb-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Regresar a la Consulta de Atletas Registrados
-            </button>
+            <!-- BOTÓN DE REGRESO (Ahora con el mismo estilo que el botón de Registro) -->
+            <div class="mb-6 flex justify-end">
+                <button onclick="navigateTo('table')" class="py-2 px-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-200 shadow-md">
+                    <span class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Regresar a la Consulta
+                    </span>
+                </button>
+            </div>
 
             <!-- Formulario de Ingreso de Atleta y Nómina -->
             <section class="bg-white p-6 rounded-xl shadow-lg-azul w-full max-w-2xl mx-auto">
@@ -596,6 +600,7 @@
                 return;
             }
 
+            // Usando prompt como alternativa simple a un modal de confirmación
             const isConfirmed = prompt(`¿Estás seguro de que deseas eliminar a ${athleteName}? Escribe 'SI' para confirmar.`);
 
             if (isConfirmed && isConfirmed.toUpperCase() === 'SI') {
