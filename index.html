@@ -32,7 +32,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Pantalla de Login -->
+    <!-- Pantalla de Login (VISIBILIDAD INICIAL) -->
     <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gray-100 p-4">
         <div class="bg-white p-8 rounded-xl shadow-lg-azul w-full max-w-md">
             <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Acceso a Clubes</h1>
@@ -66,7 +66,7 @@
         </div>
     </div>
 
-    <!-- Pantalla Principal de la Aplicación -->
+    <!-- Pantalla Principal de la Aplicación (OCULTA INICIALMENTE) -->
     <div id="app-screen" class="hidden flex-grow p-4 md:p-8 flex flex-col">
         <!-- HEADER: Común a ambas vistas -->
         <header class="mb-6 border-b pb-4">
@@ -87,11 +87,11 @@
             </p>
         </header>
 
-        <!-- VIEW 1: Tabla de Atletas (Página Principal) -->
+        <!-- VIEW 1: Tabla de Atletas (Simula index.html - la nueva página principal) -->
         <div id="data-table-view" class="main-view flex-grow">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold text-gray-800">Atletas Registrados (<span id="athleteCount">0</span>)</h2>
-                <!-- Botón para ir al Formulario de Registro -->
+                <!-- Botón para ir al Formulario de Registro (atletas_edit.html) -->
                 <button onclick="navigateTo('form')" class="py-2 px-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-200 shadow-md">
                     + Registrar Nuevo Atleta
                 </button>
@@ -121,8 +121,9 @@
             </p>
         </div>
 
-        <!-- VIEW 2: Formulario de Ingreso (Simulando atletas_edit.html) -->
+        <!-- VIEW 2: Formulario de Ingreso (Simula atletas_edit.html) -->
         <div id="form-edit-view" class="main-view hidden">
+            <!-- Botón para regresar a la tabla de consulta -->
             <button onclick="navigateTo('table')" class="mb-6 inline-flex items-center text-sm font-semibold text-gray-600 hover:text-azul-electrico transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
