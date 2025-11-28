@@ -7,7 +7,7 @@
     <!-- Carga de Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Carga de la fuente Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <style>
         :root {
             --color-azul-marino: #001F3F;    /* Azul Marino */
@@ -123,9 +123,9 @@
 
         <!-- VIEW 2: Formulario de Ingreso (Simula atletas_edit.html) -->
         <div id="form-edit-view" class="main-view hidden">
-            <!-- Botón para regresar a la tabla de consulta -->
-            <button onclick="navigateTo('table')" class="mb-6 inline-flex items-center text-sm font-semibold text-gray-600 hover:text-azul-electrico transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <!-- BOTÓN DE REGRESO (Se mantiene y se mejora el estilo de navegación) -->
+            <button onclick="navigateTo('table')" class="mb-6 inline-flex items-center text-base font-bold text-gray-700 hover:text-azul-electrico transition border-b border-transparent hover:border-azul-electrico pb-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
                 Regresar a la Consulta de Atletas Registrados
