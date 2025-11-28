@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -32,7 +32,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Pantalla de Login (VISIBILIDAD INICIAL) -->
+    <!-- Pantalla de Login (VISIBILIDAD INICIAL - Se controla con JS) -->
     <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gray-100 p-4">
         <div class="bg-white p-8 rounded-xl shadow-lg-azul w-full max-w-md">
             <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Acceso a Clubes</h1>
@@ -54,11 +54,11 @@
                 Iniciar Sesión
             </button>
 
-            <!-- Se eliminó el cuadro de Claves de Ejemplo -->
+            <!-- Claves de Ejemplo Eliminadas -->
         </div>
     </div>
 
-    <!-- Pantalla Principal de la Aplicación (OCULTA INICIALMENTE) -->
+    <!-- Pantalla Principal de la Aplicación (OCULTA INICIALMENTE - Se controla con JS) -->
     <div id="app-screen" class="hidden flex-grow p-4 md:p-8 flex flex-col">
         <!-- HEADER: Común a ambas vistas -->
         <header class="mb-6 border-b pb-4">
@@ -206,6 +206,8 @@
 
         // --- Configuración de Firebase y Variables Globales ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // CLAVE PARA LA PERSISTENCIA EN LOCALSTORAGE
+        const CLUB_ID_STORAGE_KEY = 'lvm_club_id'; 
         
         let firebaseConfig = {
             apiKey: "AIzaSyB5RB7mm1j-0gjCNTUEJTkyEqLjyZ3C7ws",
@@ -231,16 +233,18 @@
         let userId = null;
         let isAuthReady = false; 
         let isSaving = false; 
-        let currentClubId = null;
+        
+        // Inicializar el clubId con el valor persistente de localStorage
+        let currentClubId = localStorage.getItem(CLUB_ID_STORAGE_KEY); // <-- CARGA DE SESIÓN
 
         // Elementos de UI
         const saveButton = document.getElementById('saveButton');
         const connectionStatusElement = document.getElementById('connectionStatus');
 
-        // Simulación de Claves de Club (Clave de Pumas actualizada a pumas2025)
+        // Simulación de Claves de Club
         const clubCredentials = {
             'Angeles': 'aguilas2025',
-            'Pumas': 'pumas2025', // Clave actualizada
+            'Pumas': 'pumas2025', 
             'Estrellas': 'estrellas2025'
         };
         
@@ -397,8 +401,13 @@
                     
                     updateSaveButtonState(); 
                     
-                    // Si ya se ha iniciado sesión en un club y la auth está lista, cargar datos
+                    // Si ya se ha iniciado sesión en un club (por login o localStorage) y la auth está lista, cargar datos
                     if (currentClubId && isAuthReady && userId) {
+                         // Asegurar que la UI muestre la aplicación si no lo está (importante para recargas)
+                        document.getElementById('currentClubDisplay').textContent = currentClubId; 
+                        document.getElementById('login-screen').classList.add('hidden');
+                        document.getElementById('app-screen').classList.remove('hidden');
+                        
                         navigateTo('table'); // Asegura que la tabla se muestre y se carguen los datos
                     } else if (currentClubId && isAuthReady && !userId) {
                          document.getElementById('loadingMessage').textContent = 'Fallo al autenticar. Por favor, verifique las Reglas de Seguridad y Auth Anónimo.';
@@ -416,6 +425,16 @@
                 updateSaveButtonState();
             }
         }
+
+        // --- LÓGICA DE PERSISTENCIA DE SESIÓN INICIAL ---
+        if (currentClubId) {
+            // Si hay una sesión guardada, ocultar el login y mostrar la app con un mensaje de carga
+            document.getElementById('currentClubDisplay').textContent = currentClubId;
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            document.getElementById('loadingMessage').textContent = 'Esperando a la autenticación de Firebase para cargar los datos...';
+        }
+        
         setupFirebase();
 
         // --- Funciones de Acceso y Sesión ---
@@ -432,6 +451,8 @@
 
             if (clubCredentials[clubName] === clubKey) {
                 currentClubId = clubName;
+                localStorage.setItem(CLUB_ID_STORAGE_KEY, clubName); // <-- GUARDAR SESIÓN
+
                 document.getElementById('currentClubDisplay').textContent = clubName;
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
@@ -456,6 +477,8 @@
 
         window.logout = function() {
             currentClubId = null;
+            localStorage.removeItem(CLUB_ID_STORAGE_KEY); // <-- CERRAR SESIÓN
+
             document.getElementById('app-screen').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('clubKeyInput').value = '';
@@ -677,4 +700,4 @@
         }
     </script>
 </body>
-</html
+</html>
