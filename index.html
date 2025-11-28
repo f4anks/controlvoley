@@ -169,7 +169,8 @@
                     <h3 class="font-semibold mt-6 mb-2 azul-marino-bg text-white p-2 rounded-md">3. Datos de Nómina</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="relative">
-                            <input type="number" id="salarioBase" placeholder="Salario Base (USD)" required min="0" step="0.01" class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico pr-10">
+                            <!-- CAMBIO REALIZADO AQUÍ: Reemplazo 'salarioBase' por 'montoPago' y el placeholder -->
+                            <input type="number" id="montoPago" placeholder="Monto del Pago (USD)" required min="0" step="0.01" class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico pr-10">
                             <span class="absolute right-0 top-0 mt-2 mr-3 text-gray-500">$</span>
                         </div>
                         <select id="frecuenciaPago" required class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico">
@@ -454,6 +455,7 @@
             isSaving = true;
 
             try {
+                // NOTA: Se actualiza el nombre del campo para reflejar el cambio en la UI (id="montoPago")
                 const athleteData = {
                     clubId: currentClubId,
                     nombre: document.getElementById('nombre').value.trim(),
@@ -462,7 +464,8 @@
                     telefono: document.getElementById('telefono').value.trim(),
                     peso: parseFloat(document.getElementById('peso').value),
                     talla: parseFloat(document.getElementById('talla').value),
-                    salarioBase: parseFloat(document.getElementById('salarioBase').value),
+                    // Usamos el ID del input: montoPago
+                    montoPago: parseFloat(document.getElementById('montoPago').value), 
                     frecuenciaPago: document.getElementById('frecuenciaPago').value,
                     ultimaFechaPago: document.getElementById('ultimaFechaPago').value || '',
                     createdAt: serverTimestamp(),
@@ -560,10 +563,13 @@
                 const imcStatusClass = getIMCStatus(imc);
                 const age = calculateAge(athlete.fechaNacimiento);
                 
+                // Usamos el campo correcto para el monto de pago (montoPago o salarioBase si es un registro antiguo)
+                const paymentAmount = athlete.montoPago || athlete.salarioBase || 0; 
+                
                 const salaryFormatted = new Intl.NumberFormat('en-US', {
                     style: 'currency',
                     currency: 'USD',
-                }).format(athlete.salarioBase);
+                }).format(paymentAmount);
 
                 const lastPayment = athlete.ultimaFechaPago || 'N/A';
                 
