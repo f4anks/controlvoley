@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Nómina LVMEL - Multi-Club</title>
-    <!-- Carga de Tailwind CSS -->
+    <title>Control de Nómina LVMEL - Nómina de Atletas</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Carga de la fuente Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <style>
+        /* Estilos personalizados del tema Azul Marino/Eléctrico */
         :root {
-            --color-azul-marino: #001F3F;    /* Azul Marino */
+            --color-azul-marino: #001F3F;    /* Azul Marino */
             --color-azul-electrico: #0074D9; /* Azul Eléctrico */
         }
         body {
@@ -32,64 +31,41 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Pantalla de Login (VISIBILIDAD INICIAL) -->
-    <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-        <div class="bg-white p-8 rounded-xl shadow-lg-azul w-full max-w-md">
-            <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Acceso a Clubes</h1>
-            <p class="text-center mb-8 text-sm text-gray-600">Por favor, ingresa el nombre de tu club y la clave para acceder a tus datos.</p>
-            
-            <div class="mb-4">
-                <label for="clubNameInput" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Club</label>
-                <input type="text" id="clubNameInput" class="w-full p-3 border rounded-lg focus:ring-2 azul-electrico-border focus:border-azul-electrico" placeholder="Ej: Angeles">
-            </div>
-            
-            <div class="mb-6">
-                <label for="clubKeyInput" class="block text-sm font-medium text-gray-700 mb-1">Clave de Acceso</label>
-                <input type="password" id="clubKeyInput" class="w-full p-3 border rounded-lg focus:ring-2 azul-electrico-border focus:border-azul-electrico" placeholder="Ingresa la clave">
-            </div>
-
-            <div id="loginMessage" class="text-sm text-red-600 mb-4 text-center hidden"></div>
-
-            <button onclick="handleLogin()" id="loginButton" class="w-full py-3 azul-marino-bg text-white font-semibold rounded-lg azul-marino-hover transition duration-200">
-                Iniciar Sesión
-            </button>
-
-            <!-- Claves de Ejemplo Eliminadas -->
-        </div>
-    </div>
-
-    <!-- Pantalla Principal de la Aplicación (OCULTA INICIALMENTE) -->
-    <div id="app-screen" class="hidden flex-grow p-4 md:p-8 flex flex-col">
-        <!-- HEADER: Común a ambas vistas -->
+    <div id="app-screen" class="flex-grow p-4 md:p-8 flex flex-col">
+        
         <header class="mb-6 border-b pb-4">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
-                <h1 class="text-3xl font-extrabold text-gray-800">Gestión de Nómina y Atletas</h1>
-                <div class="flex items-center mt-2 md:mt-0">
-                    <span class="text-lg font-medium text-gray-600 mr-2">Club Actual:</span>
-                    <span id="currentClubDisplay" class="text-lg font-bold azul-electrico-text py-1 px-3 bg-blue-50 rounded-full border azul-electrico-border"></span>
-                    <button onclick="logout()" class="ml-4 text-sm text-gray-500 hover:text-blue-600 transition">
-                        (Cerrar Sesión)
-                    </button>
+            <div class="flex justify-between items-center mb-4">
+                <a href="index_menu.html" class="py-2 px-4 azul-marino-bg text-white font-semibold rounded-lg azul-marino-hover transition duration-200 shadow-md flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Regresar al Menú
+                </a>
+                
+                <div class="flex flex-col md:flex-row justify-end items-end md:items-center">
+                    <h1 class="text-3xl font-extrabold text-gray-800 text-right">Gestión de Nómina y Atletas</h1>
+                    <div class="flex items-center mt-2 md:mt-0 ml-4">
+                        <span class="text-lg font-medium text-gray-600 mr-2">Club Activo:</span>
+                        <span id="currentClubDisplay" class="text-lg font-bold azul-electrico-text py-1 px-3 bg-blue-50 rounded-full border azul-electrico-border"></span>
+                    </div>
                 </div>
             </div>
-            <!-- Elemento de depuración de Firebase -->
+            
             <p class="text-xs text-gray-400 mt-2">
                 Estado de Auth: <span id="authStatus">Inicializando...</span> | 
                 <span title="ID de usuario, crucial para las reglas de seguridad de Firestore">UserID: <span id="currentUserId">N/A</span></span>
             </p>
         </header>
 
-        <!-- VIEW 1: Tabla de Atletas (Simula index.html - la nueva página principal) -->
+
         <div id="data-table-view" class="main-view flex-grow">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold text-gray-800">Atletas Registrados (<span id="athleteCount">0</span>)</h2>
-                <!-- Botón para ir al Formulario de Registro (atletas_edit.html) -->
                 <button onclick="navigateTo('form')" class="py-2 px-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-200 shadow-md">
                     + Registrar Nuevo Atleta
                 </button>
             </div>
             
-            <!-- Contenedor de la Tabla -->
             <div class="bg-white p-4 rounded-xl shadow-lg-azul overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
@@ -99,42 +75,35 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Físico (IMC)</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Salario</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Últ. Pago</th>
-                            <!-- NUEVA COLUMNA DE STATUS -->
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="athletesTableBody" class="bg-white divide-y divide-gray-200">
-                        <!-- Datos de atletas serán insertados aquí -->
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
             <p id="loadingMessage" class="mt-4 text-center text-gray-500">Cargando datos...</p>
             <p id="firestoreErrorMessage" class="mt-2 text-center text-red-600 font-semibold hidden">
-                <!-- Se mostrarán errores de Firestore aquí -->
-            </p>
+                </p>
         </div>
 
-        <!-- VIEW 2: Formulario de Ingreso (Simula atletas_edit.html) -->
         <div id="form-edit-view" class="main-view hidden">
-            <!-- BOTÓN DE REGRESO (Ahora con el mismo estilo que el botón de Registro) -->
             <div class="mb-6 flex justify-end">
                 <button onclick="navigateTo('table')" class="py-2 px-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-200 shadow-md">
                     <span class="flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                         Regresar a la Consulta
                     </span>
                 </button>
             </div>
 
-            <!-- Formulario de Ingreso de Atleta y Nómina -->
             <section class="bg-white p-6 rounded-xl shadow-lg-azul w-full max-w-2xl mx-auto">
                 <h2 class="text-xl font-bold mb-4 border-b pb-2 azul-electrico-text">Registro de Nuevo Atleta</h2>
                 <form id="athleteForm" onsubmit="saveAthlete(event)">
 
-                    <!-- Datos Personales -->
                     <h3 class="font-semibold mt-4 mb-2 azul-marino-bg text-white p-2 rounded-md">1. Datos del Atleta</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <input type="text" id="nombre" placeholder="Nombre" required class="p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico">
@@ -146,7 +115,6 @@
                         <input type="tel" id="telefono" placeholder="Teléfono" class="p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico">
                     </div>
 
-                    <!-- Datos Físicos -->
                     <h3 class="font-semibold mt-6 mb-2 azul-marino-bg text-white p-2 rounded-md">2. Datos Físicos</h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="relative">
@@ -159,11 +127,9 @@
                         </div>
                     </div>
 
-                    <!-- Datos de Nómina -->
                     <h3 class="font-semibold mt-6 mb-2 azul-marino-bg text-white p-2 rounded-md">3. Datos de Nómina</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="relative">
-                            <!-- ID y Placeholder actualizado a "Monto del Pago (USD)" -->
                             <input type="number" id="montoPago" placeholder="Monto del Pago (USD)" required min="0" step="0.01" class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico pr-10">
                             <span class="absolute right-0 top-0 mt-2 mr-3 text-gray-500">$</span>
                         </div>
@@ -179,7 +145,6 @@
                         </div>
                     </div>
                     
-                    <!-- Indicador de estado de conexión MEJORADO -->
                     <p id="connectionStatus" class="mt-4 text-sm text-center font-medium text-yellow-600">
                         Conectando con el servidor...
                     </p>
@@ -194,7 +159,6 @@
         
     </div>
 
-    <!-- Script de Firebase y Lógica -->
     <script type="module">
         // Importaciones de Firebase SDK (v11.6.1)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -231,19 +195,18 @@
         let userId = null;
         let isAuthReady = false; 
         let isSaving = false; 
-        let currentClubId = null;
+        
+        // ** Club ID Dinámico (Recuperado de localStorage) **
+        let currentClubId = localStorage.getItem('currentClub') || 'Angeles'; 
 
         // Elementos de UI
         const saveButton = document.getElementById('saveButton');
         const connectionStatusElement = document.getElementById('connectionStatus');
+        const currentClubDisplay = document.getElementById('currentClubDisplay');
 
-        // Simulación de Claves de Club (Clave de Pumas actualizada)
-        const clubCredentials = {
-            'Angeles': 'aguilas2025',
-            'Pumas': 'pumas2025', // Clave actualizada
-            'Estrellas': 'estrellas2025'
-        };
-        
+        // Inicializar la visualización del club
+        currentClubDisplay.textContent = currentClubId;
+
         // --- Funciones de Utilidad y Navegación ---
 
         /**
@@ -270,17 +233,17 @@
          * Actualiza el estado del botón Guardar y el mensaje de conexión.
          */
         function updateSaveButtonState() {
-            if (!currentClubId) {
+            if (!currentClubId || currentClubId === 'null') { // Maneja el caso en que currentClubId sea "null" (string)
                 saveButton.disabled = true;
-                connectionStatusElement.textContent = 'Por favor, inicie sesión primero.';
-                connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-gray-600';
+                connectionStatusElement.textContent = 'ERROR: Club ID no definido. Inicie sesión.';
+                connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-red-600';
             } else if (!isAuthReady) {
                 saveButton.disabled = true;
                 connectionStatusElement.textContent = 'Conectando con el servidor...';
                 connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-yellow-600';
             } else if (isAuthReady && db && userId) {
                 saveButton.disabled = false;
-                connectionStatusElement.textContent = '¡Conexión lista! Puede guardar datos.';
+                connectionStatusElement.textContent = `¡Conexión lista! Club: ${currentClubId}.`;
                 connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-green-600';
             } else {
                 saveButton.disabled = true;
@@ -397,7 +360,7 @@
                     
                     updateSaveButtonState(); 
                     
-                    // Si ya se ha iniciado sesión en un club y la auth está lista, cargar datos
+                    // Cargar datos tan pronto como la auth esté lista
                     if (currentClubId && isAuthReady && userId) {
                         navigateTo('table'); // Asegura que la tabla se muestre y se carguen los datos
                     } else if (currentClubId && isAuthReady && !userId) {
@@ -417,57 +380,6 @@
             }
         }
         setupFirebase();
-
-        // --- Funciones de Acceso y Sesión ---
-
-        window.handleLogin = function() {
-            const clubName = document.getElementById('clubNameInput').value.trim();
-            const clubKey = document.getElementById('clubKeyInput').value.trim();
-            const loginMessage = document.getElementById('loginMessage');
-            
-            loginMessage.classList.add('hidden');
-            const loginButton = document.getElementById('loginButton');
-            loginButton.disabled = true;
-            loginButton.textContent = 'Verificando...';
-
-            if (clubCredentials[clubName] === clubKey) {
-                currentClubId = clubName;
-                document.getElementById('currentClubDisplay').textContent = clubName;
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
-                
-                updateSaveButtonState(); 
-                
-                // Navegar a la tabla. loadAthletes se llama dentro de navigateTo si Firebase está listo.
-                if (isAuthReady) {
-                    navigateTo('table');
-                } else {
-                    document.getElementById('loadingMessage').textContent = 'Esperando a la autenticación de Firebase para cargar los datos...';
-                }
-
-            } else {
-                loginMessage.textContent = 'Nombre del club o clave incorrecta.';
-                loginMessage.classList.remove('hidden');
-            }
-
-            loginButton.disabled = false;
-            loginButton.textContent = 'Iniciar Sesión';
-        }
-
-        window.logout = function() {
-            currentClubId = null;
-            document.getElementById('app-screen').classList.add('hidden');
-            document.getElementById('login-screen').classList.remove('hidden');
-            document.getElementById('clubKeyInput').value = '';
-            document.getElementById('clubNameInput').value = '';
-            document.getElementById('athletesTableBody').innerHTML = ''; 
-            document.getElementById('athleteCount').textContent = '0';
-            updateSaveButtonState();
-            if (unsubscribeAthletes) {
-                unsubscribeAthletes(); 
-                unsubscribeAthletes = null;
-            }
-        }
 
         // --- Funciones de Datos (Firestore) ---
 
@@ -492,7 +404,6 @@
             isSaving = true;
 
             try {
-                // NOTA: Se actualiza el nombre del campo para reflejar el cambio en la UI (id="montoPago")
                 const athleteData = {
                     clubId: currentClubId,
                     nombre: document.getElementById('nombre').value.trim(),
@@ -501,10 +412,9 @@
                     telefono: document.getElementById('telefono').value.trim(),
                     peso: parseFloat(document.getElementById('peso').value),
                     talla: parseFloat(document.getElementById('talla').value),
-                    // Usamos el ID del input: montoPago
                     montoPago: parseFloat(document.getElementById('montoPago').value), 
                     frecuenciaPago: document.getElementById('frecuenciaPago').value,
-                    ultimaFechaPago: document.getElementById('ultimaFechaPago').value || '',
+                    ultimaFechaPago: document.getElementById('ultimaFechaPago').value || 'N/A',
                     createdAt: serverTimestamp(),
                     userId: userId, 
                 };
@@ -600,7 +510,6 @@
                 const imcStatusClass = getIMCStatus(imc);
                 const age = calculateAge(athlete.fechaNacimiento);
                 
-                // Usamos el campo correcto para el monto de pago (montoPago o salarioBase si es un registro antiguo)
                 const paymentAmount = athlete.montoPago || athlete.salarioBase || 0; 
                 
                 const salaryFormatted = new Intl.NumberFormat('en-US', {
@@ -615,66 +524,30 @@
 
 
                 const row = `
-                    <tr class="hover:bg-gray-100 transition duration-150">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            ${athlete.nombre} ${athlete.apellido}
-                        </td>
+                    <tr class="hover:bg-gray-100">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${athlete.nombre} ${athlete.apellido}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${age} años</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${imcStatusClass}">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${imcStatusClass}">
                                 IMC: ${imc}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium azul-electrico-text">${salaryFormatted} (${athlete.frecuenciaPago.charAt(0)})</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">${salaryFormatted}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${lastPayment}</td>
-                        <!-- CELDA DE STATUS -->
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatus.class}">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                             <span class="px-2 inline-flex text-xs leading-5 rounded-full ${paymentStatus.class}">
                                 ${paymentStatus.status}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button onclick="deleteAthlete('${athlete.id}', '${athlete.nombre}')" class="text-red-600 hover:text-red-900 transition duration-150">
-                                Eliminar
-                            </button>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="#" class="text-indigo-600 hover:text-indigo-900 transition">Editar</a>
                         </td>
                     </tr>
                 `;
                 tableBody.insertAdjacentHTML('beforeend', row);
             });
         }
-        
-        /**
-         * Elimina un atleta de Firestore.
-         */
-        window.deleteAthlete = async function(athleteId, athleteName) {
-            if (!db || !userId) {
-                console.error("No se puede eliminar: Base de datos no lista o usuario no autenticado.");
-                return;
-            }
-
-            // Usando prompt como alternativa simple a un modal de confirmación
-            const isConfirmed = prompt(`¿Estás seguro de que deseas eliminar a ${athleteName}? Escribe 'SI' para confirmar.`);
-
-            if (isConfirmed && isConfirmed.toUpperCase() === 'SI') {
-                try {
-                    const publicCollectionPath = `artifacts/${appId}/public/data/athletes`;
-                    await deleteDoc(doc(db, publicCollectionPath, athleteId));
-                    console.log(`Atleta ${athleteId} eliminado con éxito.`);
-                } catch (error) {
-                    console.error("Error al eliminar el atleta:", error);
-                    // Mostrar error temporal en la UI
-                    const tableSection = document.getElementById('data-table-view');
-                    const errorMsg = document.createElement('p');
-                    errorMsg.textContent = `Error al eliminar a ${athleteName}: ${error.message}. Revise la consola.`;
-                    errorMsg.className = 'text-red-600 mt-2 text-sm text-center';
-                    tableSection.appendChild(errorMsg);
-                    setTimeout(() => errorMsg.remove(), 5000); 
-                }
-            } else {
-                 console.log(`Eliminación de ${athleteName} cancelada.`);
-            }
-        }
     </script>
+
 </body>
 </html>
