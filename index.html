@@ -53,8 +53,6 @@
             <button onclick="handleLogin()" id="loginButton" class="w-full py-3 azul-marino-bg text-white font-semibold rounded-lg azul-marino-hover transition duration-200">
                 Iniciar Sesión
             </button>
-
-            <!-- Claves de Ejemplo Eliminadas -->
         </div>
     </div>
 
@@ -101,6 +99,8 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Últ. Pago</th>
                             <!-- NUEVA COLUMNA DE STATUS -->
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <!-- NUEVA COLUMNA DE DEUDA -->
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deuda Estimada</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                         </tr>
                     </thead>
@@ -117,7 +117,7 @@
 
         <!-- VIEW 2: Formulario de Ingreso (Simula atletas_edit.html) -->
         <div id="form-edit-view" class="main-view hidden">
-            <!-- BOTÓN DE REGRESO (Ahora con el mismo estilo que el botón de Registro) -->
+            <!-- BOTÓN DE REGRESO -->
             <div class="mb-6 flex justify-end">
                 <button onclick="navigateTo('table')" class="py-2 px-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-200 shadow-md">
                     <span class="flex items-center">
@@ -163,15 +163,14 @@
                     <h3 class="font-semibold mt-6 mb-2 azul-marino-bg text-white p-2 rounded-md">3. Datos de Nómina</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="relative">
-                            <!-- ID y Placeholder actualizado a "Monto del Pago (USD)" -->
                             <input type="number" id="montoPago" placeholder="Monto del Pago (USD)" required min="0" step="0.01" class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico pr-10">
                             <span class="absolute right-0 top-0 mt-2 mr-3 text-gray-500">$</span>
                         </div>
                         <select id="frecuenciaPago" required class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico">
                             <option value="" disabled selected>Frecuencia de Pago</option>
-                            <option value="mensual">Mensual</option>
-                            <option value="quincenal">Quincenal</option>
-                            <option value="semanal">Semanal</option>
+                            <!-- SOLO QUINCENAL Y MENSUAL -->
+                            <option value="quincenal">Quincenal (Cada 15 días)</option>
+                            <option value="mensual">Mensual (Cada 1 mes)</option>
                         </select>
                         <div>
                              <label class="block text-xs text-gray-500 mb-1">Última Fecha de Pago Registrada</label>
@@ -235,7 +234,7 @@
         let isSaving = false; 
         
         // Inicializar el clubId con el valor persistente de localStorage
-        let currentClubId = localStorage.getItem(CLUB_ID_STORAGE_KEY); // <-- CARGA DE SESIÓN
+        let currentClubId = localStorage.getItem(CLUB_ID_STORAGE_KEY); 
 
         // Elementos de UI
         const saveButton = document.getElementById('saveButton');
@@ -339,7 +338,6 @@
             today.setHours(0, 0, 0, 0);
 
             const diffTime = today.getTime() - lastPayment.getTime();
-            // Calcula días transcurridos. Usa Math.floor para ser más estricto con días exactos.
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
 
             let status = '';
@@ -352,16 +350,58 @@
                 status = 'Por Vencer';
                 statusClass = 'bg-yellow-400 text-gray-900 font-bold';
             } else if (diffDays >= 0) {
-                // Incluye el día de hoy hasta 22 días antes.
                 status = 'Solvente';
                 statusClass = 'bg-green-500 text-white font-bold';
             } else {
-                 // Si la fecha de pago es futura (error de ingreso)
                 status = 'Futuro'; 
                 statusClass = 'bg-blue-500 text-white';
             }
 
             return { status, class: statusClass };
+        }
+        
+        /**
+         * NUEVA FUNCIÓN: Calcula el dinero adeudado por el atleta
+         * basado en los ciclos de pago completos que han transcurrido 
+         * desde la última fecha de pago hasta hoy.
+         */
+        function calculateDebt(lastPaymentDateStr, frequency, paymentAmount) {
+            if (!lastPaymentDateStr || !['mensual', 'quincenal'].includes(frequency) || paymentAmount <= 0) {
+                return 0;
+            }
+
+            const lastPayment = new Date(lastPaymentDateStr);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Si el último pago es hoy o en el futuro, no hay deuda
+            if (lastPayment.getTime() >= today.getTime()) return 0;
+
+            let cyclesMissed = 0;
+            let nextDueDate = new Date(lastPayment);
+            
+            if (frequency === 'quincenal') {
+                // El primer vencimiento es a los 15 días del último pago
+                nextDueDate.setDate(nextDueDate.getDate() + 15);
+                
+                while (nextDueDate.getTime() <= today.getTime()) {
+                    cyclesMissed++;
+                    // Mueve al siguiente ciclo de 15 días
+                    nextDueDate.setDate(nextDueDate.getDate() + 15); 
+                }
+            } else if (frequency === 'mensual') {
+                // El primer vencimiento es 1 mes después del último pago
+                // NOTA: setMonth maneja correctamente el desbordamiento de días (ej: 31 de Enero -> 3 de Marzo)
+                nextDueDate.setMonth(nextDueDate.getMonth() + 1);
+
+                while (nextDueDate.getTime() <= today.getTime()) {
+                    cyclesMissed++;
+                    // Mueve al siguiente mes
+                    nextDueDate.setMonth(nextDueDate.getMonth() + 1); 
+                }
+            }
+            
+            return cyclesMissed * paymentAmount;
         }
 
 
@@ -403,7 +443,6 @@
                     
                     // Si ya se ha iniciado sesión en un club (por login o localStorage) y la auth está lista, cargar datos
                     if (currentClubId && isAuthReady && userId) {
-                         // Asegurar que la UI muestre la aplicación si no lo está (importante para recargas)
                         document.getElementById('currentClubDisplay').textContent = currentClubId; 
                         document.getElementById('login-screen').classList.add('hidden');
                         document.getElementById('app-screen').classList.remove('hidden');
@@ -515,7 +554,6 @@
             isSaving = true;
 
             try {
-                // NOTA: Se actualiza el nombre del campo para reflejar el cambio en la UI (id="montoPago")
                 const athleteData = {
                     clubId: currentClubId,
                     nombre: document.getElementById('nombre').value.trim(),
@@ -524,7 +562,6 @@
                     telefono: document.getElementById('telefono').value.trim(),
                     peso: parseFloat(document.getElementById('peso').value),
                     talla: parseFloat(document.getElementById('talla').value),
-                    // Usamos el ID del input: montoPago
                     montoPago: parseFloat(document.getElementById('montoPago').value), 
                     frecuenciaPago: document.getElementById('frecuenciaPago').value,
                     ultimaFechaPago: document.getElementById('ultimaFechaPago').value || '',
@@ -612,9 +649,15 @@
         function renderAthletesTable(athletes) {
             const tableBody = document.getElementById('athletesTableBody');
             tableBody.innerHTML = ''; 
+            
+            // Formatador de moneda
+            const currencyFormatter = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+            });
 
             if (athletes.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">No hay atletas registrados para este club. ¡Regista uno nuevo!</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-gray-500">No hay atletas registrados para este club. ¡Regista uno nuevo!</td></tr>';
                 return;
             }
 
@@ -623,18 +666,19 @@
                 const imcStatusClass = getIMCStatus(imc);
                 const age = calculateAge(athlete.fechaNacimiento);
                 
-                // Usamos el campo correcto para el monto de pago (montoPago o salarioBase si es un registro antiguo)
                 const paymentAmount = athlete.montoPago || athlete.salarioBase || 0; 
-                
-                const salaryFormatted = new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                }).format(paymentAmount);
+                const salaryFormatted = currencyFormatter.format(paymentAmount);
 
                 const lastPayment = athlete.ultimaFechaPago || 'N/A';
+                const frequency = athlete.frecuenciaPago || 'N/A';
                 
                 // CÁLCULO DEL STATUS DE PAGO
                 const paymentStatus = getPaymentStatus(lastPayment);
+                
+                // CÁLCULO DE LA DEUDA
+                const estimatedDebt = calculateDebt(lastPayment, frequency, paymentAmount);
+                const debtFormatted = currencyFormatter.format(estimatedDebt);
+                const debtClass = estimatedDebt > 0 ? 'text-red-600 font-semibold' : 'text-green-600';
 
 
                 const row = `
@@ -648,13 +692,17 @@
                                 IMC: ${imc}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium azul-electrico-text">${salaryFormatted} (${athlete.frecuenciaPago.charAt(0)})</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium azul-electrico-text">${salaryFormatted} (${frequency.charAt(0).toUpperCase()})</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${lastPayment}</td>
                         <!-- CELDA DE STATUS -->
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                             <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${paymentStatus.class}">
                                 ${paymentStatus.status}
                             </span>
+                        </td>
+                         <!-- CELDA DE DEUDA -->
+                        <td class="px-6 py-4 whitespace-nowrap text-sm ${debtClass}">
+                            ${debtFormatted}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <button onclick="deleteAthlete('${athlete.id}', '${athlete.nombre}')" class="text-red-600 hover:text-red-900 transition duration-150">
