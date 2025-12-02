@@ -33,9 +33,12 @@
         /* Sombra más luminosa/azulada en hover */
         box-shadow: 0 10px 15px -3px rgba(0, 51, 102, 0.6), 0 4px 6px -2px rgba(0, 51, 102, 0.4);
       }
-      .score-positive { color: #4ade80; } /* Verde - Mantenido */
-      .score-negative { color: #f87171; } /* Rojo - Mantenido */
-      .score-neutral { color: #ffeb3b; } /* Amarillo más vivo */ 
+      /* COLOR POSITIVO: Azul Zafiro Vivo */
+      .score-positive { color: #00A3FF; } 
+      /* COLOR NEGATIVO: Rojo */
+      .score-negative { color: #f87171; } 
+      /* COLOR NEUTRAL: Amarillo más vivo */
+      .score-neutral { color: #ffeb3b; } 
 
       input[type=number]::-webkit-inner-spin-button,
       input[type=number]::-webkit-outer-spin-button {
@@ -51,11 +54,6 @@
         box-shadow: 0 0 0 2px #003366, 0 0 0 4px #0056FF;
       }
 
-      /* Modificación de colores Tailwind en HTML y JS: */
-      /* bg-gray-700 -> #004080 (Azul Intermedio) */
-      /* border-gray-600 -> #0056FF (Azul Eléctrico) */
-      /* bg-indigo-600/700 -> #0056FF (Azul Eléctrico) */
-      
       #actionSelect {
         color: #d1d5db;
       }
@@ -239,7 +237,8 @@
             const actionValue = actionName ? actions[actionName] : 0; 
 
             if (actionValue > 0) {
-                actionSelect.style.color = '#4ade80';
+                // Azul Zafiro Vivo
+                actionSelect.style.color = '#00A3FF'; 
             } else if (actionValue < 0) {
                 actionSelect.style.color = '#f87171';
             } else {
@@ -261,7 +260,8 @@
                 option.textContent = `${actionName} (${value > 0 ? '+' : ''}${value})`;
                 
                 if (value > 0) {
-                    option.style.color = '#4ade80';
+                    // Azul Zafiro Vivo
+                    option.style.color = '#00A3FF'; 
                 } else if (value < 0) {
                     option.style.color = '#f87171';
                 } else { 
@@ -292,8 +292,9 @@
                         {
                             label: 'Acciones Positivas',
                             data: chartData.positiveData,
-                            backgroundColor: 'rgba(76, 201, 76, 0.9)', // Verde
-                            borderColor: 'rgba(76, 201, 76, 1)',
+                            // Azul Zafiro Vivo para positivos
+                            backgroundColor: 'rgba(0, 163, 255, 0.9)', 
+                            borderColor: 'rgba(0, 163, 255, 1)',
                             borderWidth: 1,
                             barThickness: 15, 
                             maxBarThickness: 20
@@ -301,7 +302,8 @@
                         {
                             label: 'Acciones Negativas',
                             data: chartData.negativeData,
-                            backgroundColor: 'rgba(240, 80, 80, 0.9)', // Rojo
+                            // Rojo para negativos
+                            backgroundColor: 'rgba(240, 80, 80, 0.9)', 
                             borderColor: 'rgba(240, 80, 80, 1)',
                             borderWidth: 1,
                             barThickness: 15, 
@@ -417,7 +419,6 @@
                     chartData.negativeData.push(stats.negative); 
 
                     const rowDiv = document.createElement('div');
-                    // Usar un fondo más oscuro para las filas
                     rowDiv.className = 'grid grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))] gap-4 items-center bg-[#004080] p-3 rounded-md';
 
                     const actionNameSpan = document.createElement('span');
@@ -487,7 +488,6 @@
 
                 players.slice().sort((a, b) => b.score - a.score).forEach(player => {
                     const scoreDiv = document.createElement('div');
-                    // Usar un fondo más oscuro para las filas
                     scoreDiv.className = 'grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(0,1fr))] gap-4 items-center bg-[#004080] p-3 rounded-md';
 
                     const playerInfo = document.createElement('span');
@@ -517,6 +517,7 @@
                         efficiency = (player.positiveScore / player.totalActions) * 100;
                     }
                     efficiencySpan.textContent = `${efficiency.toFixed(1)}%`;
+                    // Las clases de color usan el CSS de la sección <style>
                     if (efficiency >= 60) efficiencySpan.classList.add('score-positive');
                     else if (efficiency < 40 && efficiency > 0) efficiencySpan.classList.add('score-negative');
                     else efficiencySpan.classList.add('score-neutral'); 
