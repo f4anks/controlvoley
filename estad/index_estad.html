@@ -17,27 +17,36 @@
         -webkit-user-select: none;
         -moz-user-select: none;
         -ms-user-select: none;
-        /* Fondo Azul Oscuro Intenso */
-        background-color: #001C40; 
+        /* Fondo Azul Profundo (más intenso y atractivo) */
+        background-color: #001122; 
       }
       .card {
         /* Fondo de Tarjeta Azul Medianoche */
-        background-color: #003366;
-        border: 1px solid #004080; /* Borde más oscuro */
+        background-color: #002244;
+        border: 1px solid #0056FF; /* Borde Azul Eléctrico */
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        /* Sombra Azul Oscura */
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+        /* Sombra Azul Profunda */
+        box-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.5), 0 2px 5px -2px rgba(0, 0, 0, 0.3);
       }
       .card:hover {
         transform: translateY(-4px);
         /* Sombra más luminosa/azulada en hover */
-        box-shadow: 0 10px 15px -3px rgba(0, 51, 102, 0.6), 0 4px 6px -2px rgba(0, 51, 102, 0.4);
+        box-shadow: 0 12px 20px -5px rgba(0, 86, 255, 0.4), 0 5px 10px -3px rgba(0, 0, 0, 0.2);
       }
-      /* COLOR POSITIVO: Azul Zafiro Vivo */
+      
+      /* Filas de Estadística con fondo CLARO para alto contraste */
+      .stat-row-bg {
+        background-color: #e5e7eb; /* Gris muy claro / Tailwind gray-200 */
+      }
+      .stat-row-text-dark {
+        color: #1f2937; /* Gris oscuro / Tailwind gray-800 */
+      }
+      
+      /* COLOR POSITIVO: Azul Zafiro Vivo (Mantenido) */
       .score-positive { color: #00A3FF; } 
-      /* COLOR NEGATIVO: Rojo */
-      .score-negative { color: #f87171; } 
-      /* COLOR NEUTRAL: Amarillo más vivo */
+      /* COLOR NEGATIVO: Rojo (Mantenido) */
+      .score-negative { color: #dc2626; } 
+      /* COLOR NEUTRAL: Amarillo más vivo (Mantenido) */
       .score-neutral { color: #ffeb3b; } 
 
       input[type=number]::-webkit-inner-spin-button,
@@ -51,7 +60,7 @@
       
       input:focus, select:focus {
         /* Foco Azul Eléctrico */
-        box-shadow: 0 0 0 2px #003366, 0 0 0 4px #0056FF;
+        box-shadow: 0 0 0 2px #002244, 0 0 0 4px #0056FF;
       }
 
       #actionSelect {
@@ -65,12 +74,12 @@
         width: 100%;
         max-width: 5xl;
         margin-top: 2rem;
-        border-top: 1px solid #004080; /* Borde de footer */
-        font-size: 0.875rem; /* text-sm */
-        color: #9ca3af; /* gray-400 */
+        border-top: 1px solid #003366; 
+        font-size: 0.875rem; 
+        color: #9ca3af; 
       }
       footer strong {
-        color: #d1d5db; /* gray-300 */
+        color: #d1d5db; 
         font-weight: 500;
       }
     </style>
@@ -79,28 +88,27 @@
   <body class="text-white min-h-screen flex flex-col items-center p-4">
     <main class="w-full max-w-5xl mx-auto space-y-8 shadow-2xl">
       <header class="text-center relative">
-        <a href="../index_menu.html" class="absolute top-0 right-0 bg-[#004080] hover:bg-[#0056FF] text-white font-bold py-2 px-4 rounded-md transition-colors text-sm" aria-label="Regresar al Menú">
+        <a href="../index_menu.html" class="absolute top-0 right-0 bg-[#002244] hover:bg-[#0056FF] border border-[#0056FF] text-white font-bold py-2 px-4 rounded-md transition-colors text-sm" aria-label="Regresar al Menú">
             Regresar al Menú
         </a>
 
-        <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl">Control Voley Stats Tracker (Estadísticas)</h1>
-        <p class="mt-4 text-lg text-gray-300">Monitorea el rendimiento y la
-          eficiencia de tus atletas.</p>
+        <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">Control Voley <span class="text-[#00A3FF]">Stats Tracker</span></h1>
+        <p class="mt-4 text-lg text-gray-300 font-medium">Monitorea el rendimiento y la
+          eficiencia de tus atletas en tiempo real.</p>
       </header>
       
       <div class="grid grid-cols-1 gap-8">
         <div class="space-y-6">
           <div class="card p-6 rounded-lg">
-            <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2">Agregar
-              Atleta</h2>
+            <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2">Registrar Atleta</h2>
             <div class="flex flex-col sm:flex-row gap-4"> 
               <input id="playerNumberInput" placeholder="Nro." 
-                class="w-full sm:w-24 bg-[#004080] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
+                class="w-full sm:w-24 bg-[#003366] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
                 type="number"> 
               <input id="playerNameInput" placeholder="Nombre del Atleta"
-                class="flex-grow bg-[#004080] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
+                class="flex-grow bg-[#003366] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
                 type="text"> 
-              <button id="addPlayerBtn" class="bg-[#0056FF] hover:bg-[#007bff] text-white font-bold py-2 px-4 rounded-md transition-colors">
+              <button id="addPlayerBtn" class="bg-[#0056FF] hover:bg-[#007bff] text-white font-bold py-2 px-4 rounded-md transition-colors shadow-lg">
                 Agregar 
               </button> 
             </div>
@@ -113,7 +121,7 @@
               <div> 
                 <label for="playerSelect" class="block mb-2 text-sm font-medium text-gray-300">Seleccionar
                   Atleta</label>
-                <select id="playerSelect" class="w-full bg-[#004080] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]">
+                <select id="playerSelect" class="w-full bg-[#003366] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]">
                   <option disabled="disabled" selected="selected">Agregar atleta
                     primero</option>
                 </select>
@@ -121,25 +129,25 @@
               <div> 
                 <label for="actionSelect" class="block mb-2 text-sm font-medium text-gray-300">Tipo
                   de Acción</label>
-                <select id="actionSelect" class="w-full bg-[#004080] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]">
+                <select id="actionSelect" class="w-full bg-[#003366] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]">
                 </select>
               </div>
               <div class="hidden"> 
                 <label for="quantityInput" class="block mb-2 text-sm font-medium text-gray-300">Cantidad</label>
                 <input id="quantityInput" value="1" min="1" 
-                  class="w-full bg-[#004080] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
+                  class="w-full bg-[#003366] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
                   type="number"> 
               </div>
               
-              <button type="submit" class="w-full bg-[#0056FF] hover:bg-[#007bff] text-white font-bold py-2 px-4 rounded-md transition-colors">
+              <button type="submit" class="w-full bg-[#0056FF] hover:bg-[#007bff] text-white font-bold py-2 px-4 rounded-md transition-colors shadow-lg">
                 Registrar 
               </button> 
               
-              <button type="button" id="clearSetDataBtn" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded-md transition-colors mt-4">
+              <button type="button" id="clearSetDataBtn" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded-md transition-colors mt-4 shadow-md">
                 Eliminar Datos del Set 
               </button> 
 
-              <button type="button" id="clearGameDataBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition-colors mt-4">
+              <button type="button" id="clearGameDataBtn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition-colors mt-4 shadow-md">
                 Eliminar Datos del Juego 
               </button> 
             </form>
@@ -171,7 +179,7 @@
       </div>
     </main>
 
-    <footer class="mt-8 border-t border-[#004080] text-gray-400 text-sm w-full max-w-5xl">
+    <footer class="mt-8 border-t border-[#003366] text-gray-400 text-sm w-full max-w-5xl">
         <p>Copyright © Empresa Sistematikos. Todos los derechos reservados.</p>
         <p>Diseñado por <strong>Sistematikos - Frank Hernandez</strong></p>
     </footer>
@@ -303,8 +311,8 @@
                             label: 'Acciones Negativas',
                             data: chartData.negativeData,
                             // Rojo para negativos
-                            backgroundColor: 'rgba(240, 80, 80, 0.9)', 
-                            borderColor: 'rgba(240, 80, 80, 1)',
+                            backgroundColor: 'rgba(220, 38, 38, 0.9)', 
+                            borderColor: 'rgba(220, 38, 38, 1)',
                             borderWidth: 1,
                             barThickness: 15, 
                             maxBarThickness: 20
@@ -317,7 +325,7 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: { color: 'rgba(255, 255, 255, 0.3)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
                             ticks: { 
                                 color: '#d1d5db',
                                 // Asegura que los ticks sean solo números enteros.
@@ -394,7 +402,7 @@
                 }
             });
 
-            // 3. Crear el encabezado de la tabla
+            // 3. Crear el encabezado de la tabla (mantener texto claro)
             const header = document.createElement('div');
             header.className = 'grid grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))] gap-4 font-semibold text-gray-300 text-sm mb-2 px-3';
             header.innerHTML = `
@@ -419,30 +427,31 @@
                     chartData.negativeData.push(stats.negative); 
 
                     const rowDiv = document.createElement('div');
-                    rowDiv.className = 'grid grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))] gap-4 items-center bg-[#004080] p-3 rounded-md';
+                    // Usar la clase clara para el fondo de la fila
+                    rowDiv.className = 'grid grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))] gap-4 items-center stat-row-bg p-3 rounded-md';
 
                     const actionNameSpan = document.createElement('span');
-                    actionNameSpan.className = 'font-bold text-gray-300';
+                    actionNameSpan.className = 'font-bold stat-row-text-dark';
                     actionNameSpan.textContent = actionType;
                     rowDiv.appendChild(actionNameSpan);
 
                     const positiveSpan = document.createElement('span');
-                    positiveSpan.className = 'text-center score-positive font-medium';
+                    positiveSpan.className = 'text-center score-positive font-medium stat-row-text-dark';
                     positiveSpan.textContent = `+${stats.positive}`;
                     rowDiv.appendChild(positiveSpan);
 
                     const negativeSpan = document.createElement('span');
-                    negativeSpan.className = 'text-center score-negative font-medium';
+                    negativeSpan.className = 'text-center score-negative font-medium stat-row-text-dark';
                     negativeSpan.textContent = stats.negative;
                     rowDiv.appendChild(negativeSpan);
                     
                     const totalActionsSpan = document.createElement('span');
-                    totalActionsSpan.className = 'text-center text-gray-400 font-medium';
+                    totalActionsSpan.className = 'text-center stat-row-text-dark font-medium';
                     totalActionsSpan.textContent = stats.total;
                     rowDiv.appendChild(totalActionsSpan);
                     
                     const scoreSpan = document.createElement('span');
-                    scoreSpan.className = 'font-bold text-lg text-right score-neutral';
+                    scoreSpan.className = 'font-bold text-lg text-right score-neutral stat-row-text-dark';
                     scoreSpan.textContent = stats.score;
                     rowDiv.appendChild(scoreSpan);
 
@@ -488,30 +497,31 @@
 
                 players.slice().sort((a, b) => b.score - a.score).forEach(player => {
                     const scoreDiv = document.createElement('div');
-                    scoreDiv.className = 'grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(0,1fr))] gap-4 items-center bg-[#004080] p-3 rounded-md';
+                    // Usar la clase clara para el fondo de la fila
+                    scoreDiv.className = 'grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(0,1fr))] gap-4 items-center stat-row-bg p-3 rounded-md';
 
                     const playerInfo = document.createElement('span');
                     playerInfo.className = 'truncate';
-                    playerInfo.innerHTML = `<span class="font-bold">#${player.number}</span> <span class="text-gray-300">${player.name}</span>`;
+                    playerInfo.innerHTML = `<span class="font-bold stat-row-text-dark">#${player.number}</span> <span class="stat-row-text-dark">${player.name}</span>`;
 
                     const positiveScore = document.createElement('span');
-                    positiveScore.className = 'text-center score-positive font-medium';
+                    positiveScore.className = 'text-center score-positive font-medium stat-row-text-dark';
                     positiveScore.textContent = `+${player.positiveScore}`;
 
                     const negativeScore = document.createElement('span');
-                    negativeScore.className = 'text-center score-negative font-medium';
+                    negativeScore.className = 'text-center score-negative font-medium stat-row-text-dark';
                     negativeScore.textContent = player.negativeScore;
 
                     const totalActionsCount = document.createElement('span');
-                    totalActionsCount.className = 'text-center text-gray-400 font-medium'; 
+                    totalActionsCount.className = 'text-center stat-row-text-dark font-medium'; 
                     totalActionsCount.textContent = player.totalActions; 
 
                     const totalScore = document.createElement('span');
-                    totalScore.className = 'font-bold text-xl text-right score-neutral'; 
+                    totalScore.className = 'font-bold text-xl text-right score-neutral stat-row-text-dark'; 
                     totalScore.textContent = player.score;
 
                     const efficiencySpan = document.createElement('span');
-                    efficiencySpan.className = 'text-center font-semibold text-lg';
+                    efficiencySpan.className = 'text-center font-semibold text-lg stat-row-text-dark';
                     let efficiency = 0;
                     if (player.totalActions > 0) {
                         efficiency = (player.positiveScore / player.totalActions) * 100;
