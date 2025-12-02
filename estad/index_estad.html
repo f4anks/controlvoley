@@ -43,12 +43,12 @@
         color: #1f2937; /* Gris oscuro / Tailwind gray-800 */
       }
       
-      /* COLOR POSITIVO: Azul Zafiro Vivo (Mantenido para el acento) */
-      .score-positive { color: #0056FF; } /* Usamos el color de foco/botón para ser el principal positivo */
-      /* COLOR NEGATIVO: Rojo (Mantenido para el acento) */
+      /* COLOR POSITIVO: Azul Eléctrico (Mantenido) */
+      .score-positive { color: #0056FF; } 
+      /* COLOR NEGATIVO: Rojo (Mantenido) */
       .score-negative { color: #dc2626; } 
-      /* COLOR NEUTRAL: Amarillo (Mantenido para el acento) */
-      .score-neutral { color: #ffeb3b; } 
+      /* COLOR NEUTRAL (Puntos/Score): Naranja Más Oscuro/Ámbar */
+      .score-neutral { color: #f97316; } 
 
       input[type=number]::-webkit-inner-spin-button,
       input[type=number]::-webkit-outer-spin-button {
@@ -259,7 +259,7 @@
             } else if (actionValue < 0) {
                 actionSelect.style.color = '#dc2626';
             } else {
-                actionSelect.style.color = '#ffeb3b';
+                actionSelect.style.color = '#f97316'; /* Naranja */
             }
         }
 
@@ -282,7 +282,7 @@
                 } else if (value < 0) {
                     option.style.color = '#dc2626';
                 } else { 
-                    option.style.color = '#ffeb3b';
+                    option.style.color = '#f97316'; /* Naranja */
                 }
                 actionSelect.appendChild(option);
             });
@@ -334,9 +334,9 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: { color: 'rgba(0, 0, 0, 0.1)' }, /* Grilla clara en el fondo blanco de la tarjeta */
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' }, 
                             ticks: { 
-                                color: '#1f2937', /* Ticks oscuros */
+                                color: '#1f2937', 
                                 callback: function(value) {
                                     if (Number.isInteger(value)) {
                                         return value;
@@ -352,14 +352,14 @@
                         x: {
                             grid: { display: false },
                             ticks: { 
-                                color: '#1f2937' /* Ticks oscuros */
+                                color: '#1f2937' 
                             }
                         }
                     },
                     plugins: {
                         legend: {
                             display: true,
-                            labels: { color: '#1f2937' } /* Leyenda oscura */
+                            labels: { color: '#1f2937' } 
                         },
                         tooltip: {
                             callbacks: {
