@@ -17,24 +17,25 @@
         -webkit-user-select: none;
         -moz-user-select: none;
         -ms-user-select: none;
-        /* Fondo General Gris Oscuro */
-        background-color: #1f2937; 
+        /* Fondo General Azul Eléctrico Intenso */
+        background-color: #004080; 
       }
       .card {
-        /* Fondo de Tarjeta Gris muy Oscuro (casi negro) */
-        background-color: #111827;
-        border: 1px solid #374151; /* Borde Gris */
+        /* Fondo de Tarjeta Blanco/Gris Muy Claro para contraste */
+        background-color: #ffffff; 
+        color: #1f2937; /* Texto oscuro para el contenido de la tarjeta */
+        border: 1px solid #d1d5db; /* Borde gris claro */
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        /* Sombra sutil en gris oscuro */
-        box-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.5), 0 2px 5px -2px rgba(0, 0, 0, 0.3);
+        /* Sombra Azul para destacar la interactividad */
+        box-shadow: 0 4px 10px -1px rgba(0, 86, 255, 0.4), 0 2px 5px -2px rgba(0, 86, 255, 0.2);
       }
       .card:hover {
         transform: translateY(-4px);
-        /* Sombra con un toque de azul para foco */
-        box-shadow: 0 12px 20px -5px rgba(0, 86, 255, 0.2), 0 5px 10px -3px rgba(0, 0, 0, 0.2);
+        /* Sombra más intensa en hover */
+        box-shadow: 0 12px 20px -5px rgba(0, 86, 255, 0.6), 0 5px 10px -3px rgba(0, 86, 255, 0.4);
       }
       
-      /* Filas de Estadística con fondo CLARO (gris muy claro) */
+      /* Filas de Estadística con fondo CLARO (gris muy claro, casi blanco) */
       .stat-row-bg {
         background-color: #f3f4f6; /* Gris muy claro / Tailwind gray-100 */
       }
@@ -43,7 +44,7 @@
       }
       
       /* COLOR POSITIVO: Azul Zafiro Vivo (Mantenido para el acento) */
-      .score-positive { color: #00A3FF; } 
+      .score-positive { color: #0056FF; } /* Usamos el color de foco/botón para ser el principal positivo */
       /* COLOR NEGATIVO: Rojo (Mantenido para el acento) */
       .score-negative { color: #dc2626; } 
       /* COLOR NEUTRAL: Amarillo (Mantenido para el acento) */
@@ -58,29 +59,36 @@
         -moz-appearance: textfield;
       }
       
-      input:focus, select:focus {
-        /* Foco Azul Eléctrico */
-        box-shadow: 0 0 0 2px #111827, 0 0 0 4px #0056FF;
-      }
-
-      /* Texto de selects en modo oscuro (Tarjetas) */
-      #actionSelect {
-        color: #d1d5db; 
+      /* Campos de input dentro de tarjetas claras */
+      input, select {
+          border: 1px solid #d1d5db !important; /* Borde más visible */
+          background-color: #ffffff !important; /* Fondo blanco */
+          color: #1f2937 !important; /* Texto oscuro */
       }
       
-      /* Estilo básico para el footer */
+      input:focus, select:focus {
+        /* Foco Azul Eléctrico */
+        box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #0056FF;
+      }
+
+      /* Texto de selects en modo claro */
+      #actionSelect {
+        color: #1f2937 !important; 
+      }
+      
+      /* Estilo básico para el footer (manteniendo el color oscuro sobre el fondo azul) */
       footer {
         padding: 1.5rem 0;
         text-align: center;
         width: 100%;
         max-width: 5xl;
         margin-top: 2rem;
-        border-top: 1px solid #374151; /* Borde gris oscuro */
+        border-top: 1px solid #0056FF; /* Borde azul brillante */
         font-size: 0.875rem; 
-        color: #9ca3af; 
+        color: #d1d5db; /* Texto claro */
       }
       footer strong {
-        color: #d1d5db; 
+        color: #ffffff; 
         font-weight: 500;
       }
     </style>
@@ -88,26 +96,26 @@
 
   <body class="text-white min-h-screen flex flex-col items-center p-4">
     <main class="w-full max-w-5xl mx-auto space-y-8 shadow-2xl">
-      <header class="text-center relative">
-        <a href="../index_menu.html" class="absolute top-0 right-0 bg-[#374151] hover:bg-[#0056FF] border border-[#0056FF] text-white font-bold py-2 px-4 rounded-md transition-colors text-sm" aria-label="Regresar al Menú">
+      <header class="text-center relative text-white">
+        <a href="../index_menu.html" class="absolute top-0 right-0 bg-[#0056FF] hover:bg-[#007bff] text-white font-bold py-2 px-4 rounded-md transition-colors text-sm shadow-md" aria-label="Regresar al Menú">
             Regresar al Menú
         </a>
 
-        <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">Control Voley <span class="text-[#00A3FF]">Stats Tracker</span></h1>
-        <p class="mt-4 text-lg text-gray-400 font-medium">Monitorea el rendimiento y la
+        <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">Control Voley <span class="text-yellow-400">Stats Tracker</span></h1>
+        <p class="mt-4 text-lg text-gray-200 font-medium">Monitorea el rendimiento y la
           eficiencia de tus atletas en tiempo real.</p>
       </header>
       
       <div class="grid grid-cols-1 gap-8">
         <div class="space-y-6">
           <div class="card p-6 rounded-lg">
-            <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2">Registrar Atleta</h2>
+            <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2 text-[#0056FF]">Registrar Atleta</h2>
             <div class="flex flex-col sm:flex-row gap-4"> 
               <input id="playerNumberInput" placeholder="Nro." 
-                class="w-full sm:w-24 bg-[#1f2937] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
+                class="w-full sm:w-24 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
                 type="number"> 
               <input id="playerNameInput" placeholder="Nombre del Atleta"
-                class="flex-grow bg-[#1f2937] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
+                class="flex-grow rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
                 type="text"> 
               <button id="addPlayerBtn" class="bg-[#0056FF] hover:bg-[#007bff] text-white font-bold py-2 px-4 rounded-md transition-colors shadow-lg">
                 Agregar 
@@ -116,27 +124,27 @@
           </div>
           
           <div class="card p-6 rounded-lg">
-            <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2">Registrar
+            <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2 text-[#0056FF]">Registrar
               Acción</h2>
             <form id="actionForm" class="space-y-4">
               <div> 
-                <label for="playerSelect" class="block mb-2 text-sm font-medium text-gray-300">Seleccionar
+                <label for="playerSelect" class="block mb-2 text-sm font-medium stat-row-text-dark">Seleccionar
                   Atleta</label>
-                <select id="playerSelect" class="w-full bg-[#1f2937] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]">
+                <select id="playerSelect" class="w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0056FF]">
                   <option disabled="disabled" selected="selected">Agregar atleta
                     primero</option>
                 </select>
               </div>
               <div> 
-                <label for="actionSelect" class="block mb-2 text-sm font-medium text-gray-300">Tipo
+                <label for="actionSelect" class="block mb-2 text-sm font-medium stat-row-text-dark">Tipo
                   de Acción</label>
-                <select id="actionSelect" class="w-full bg-[#1f2937] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]">
+                <select id="actionSelect" class="w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0056FF]">
                 </select>
               </div>
               <div class="hidden"> 
-                <label for="quantityInput" class="block mb-2 text-sm font-medium text-gray-300">Cantidad</label>
+                <label for="quantityInput" class="block mb-2 text-sm font-medium stat-row-text-dark">Cantidad</label>
                 <input id="quantityInput" value="1" min="1" 
-                  class="w-full bg-[#1f2937] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
+                  class="w-full rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
                   type="number"> 
               </div>
               
@@ -156,22 +164,22 @@
         </div>
         
         <div class="card p-6 rounded-lg">
-          <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2">Estadística por Atleta</h2>
+          <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2 text-[#0056FF]">Estadística por Atleta</h2>
           <div id="scoresContainer" class="space-y-3">
-            <p class="text-gray-400 text-center py-8">Aún no hay atletas.
+            <p class="stat-row-text-dark text-center py-8">Aún no hay atletas.
               ¡Agrégalos para empezar!</p>
           </div>
         </div>
         
         <div class="card p-6 rounded-lg mt-8">
-            <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2">Estadística General por Equipo</h2>
+            <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2 text-[#0056FF]">Estadística General por Equipo</h2>
             <div id="generalStatsContainer" class="space-y-3">
-                <p class="text-gray-400 text-center py-8">Registra acciones para ver el resumen.</p>
+                <p class="stat-row-text-dark text-center py-8">Registra acciones para ver el resumen.</p>
             </div>
         </div>
         
         <div class="card p-6 rounded-lg mt-8">
-            <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2">Gráfica General del Equipo (Positivos vs Negativos)</h2>
+            <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2 text-[#0056FF]">Gráfica General del Equipo (Positivos vs Negativos)</h2>
             <div class="h-96">
                 <canvas id="barChart"></canvas>
             </div>
@@ -180,7 +188,7 @@
       </div>
     </main>
 
-    <footer class="mt-8 border-t border-[#374151] text-gray-400 text-sm w-full max-w-5xl">
+    <footer class="mt-8 border-t border-[#0056FF] text-gray-200 text-sm w-full max-w-5xl">
         <p>Copyright © Empresa Sistematikos. Todos los derechos reservados.</p>
         <p>Diseñado por <strong>Sistematikos - Frank Hernandez</strong></p>
     </footer>
@@ -246,10 +254,10 @@
             const actionValue = actionName ? actions[actionName] : 0; 
 
             if (actionValue > 0) {
-                // Azul Zafiro Vivo
-                actionSelect.style.color = '#00A3FF'; 
+                // Azul Eléctrico
+                actionSelect.style.color = '#0056FF'; 
             } else if (actionValue < 0) {
-                actionSelect.style.color = '#f87171';
+                actionSelect.style.color = '#dc2626';
             } else {
                 actionSelect.style.color = '#ffeb3b';
             }
@@ -269,10 +277,10 @@
                 option.textContent = `${actionName} (${value > 0 ? '+' : ''}${value})`;
                 
                 if (value > 0) {
-                    // Azul Zafiro Vivo
-                    option.style.color = '#00A3FF'; 
+                    // Azul Eléctrico
+                    option.style.color = '#0056FF'; 
                 } else if (value < 0) {
-                    option.style.color = '#f87171';
+                    option.style.color = '#dc2626';
                 } else { 
                     option.style.color = '#ffeb3b';
                 }
@@ -301,9 +309,9 @@
                         {
                             label: 'Acciones Positivas',
                             data: chartData.positiveData,
-                            // Azul Zafiro Vivo para positivos
-                            backgroundColor: 'rgba(0, 163, 255, 0.9)', 
-                            borderColor: 'rgba(0, 163, 255, 1)',
+                            // Azul Eléctrico para positivos
+                            backgroundColor: 'rgba(0, 86, 255, 0.9)', 
+                            borderColor: 'rgba(0, 86, 255, 1)',
                             borderWidth: 1,
                             barThickness: 15, 
                             maxBarThickness: 20
@@ -326,10 +334,9 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' }, /* Grilla clara en el fondo blanco de la tarjeta */
                             ticks: { 
-                                color: '#d1d5db',
-                                // Asegura que los ticks sean solo números enteros.
+                                color: '#1f2937', /* Ticks oscuros */
                                 callback: function(value) {
                                     if (Number.isInteger(value)) {
                                         return value;
@@ -339,20 +346,20 @@
                             title: {
                                 display: true,
                                 text: 'Conteo de Acciones',
-                                color: '#d1d5db'
+                                color: '#1f2937'
                             }
                         },
                         x: {
                             grid: { display: false },
                             ticks: { 
-                                color: '#d1d5db'
+                                color: '#1f2937' /* Ticks oscuros */
                             }
                         }
                     },
                     plugins: {
                         legend: {
                             display: true,
-                            labels: { color: '#d1d5db' }
+                            labels: { color: '#1f2937' } /* Leyenda oscura */
                         },
                         tooltip: {
                             callbacks: {
@@ -372,7 +379,7 @@
             generalStatsContainer.innerHTML = '';
             
             if (actionLog.length === 0) {
-                generalStatsContainer.innerHTML = '<p class="text-gray-400 text-center py-8">Registra acciones para ver el resumen.</p>';
+                generalStatsContainer.innerHTML = '<p class="stat-row-text-dark text-center py-8">Registra acciones para ver el resumen.</p>';
                 renderBarChart({}); 
                 return;
             }
@@ -403,9 +410,9 @@
                 }
             });
 
-            // 3. Crear el encabezado de la tabla (mantener texto claro)
+            // 3. Crear el encabezado de la tabla (Texto oscuro)
             const header = document.createElement('div');
-            header.className = 'grid grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))] gap-4 font-semibold text-gray-300 text-sm mb-2 px-3';
+            header.className = 'grid grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))] gap-4 font-semibold stat-row-text-dark text-sm mb-2 px-3';
             header.innerHTML = `
                 <span class="text-left">Acción</span>
                 <span class="text-center">Pos</span>
@@ -482,10 +489,10 @@
 
             scoresContainer.innerHTML = '';
             if (players.length === 0) {
-                scoresContainer.innerHTML = '<p class="text-gray-400 text-center py-8">Aún no hay atletas. ¡Agrégalos para empezar!</p>';
+                scoresContainer.innerHTML = '<p class="stat-row-text-dark text-center py-8">Aún no hay atletas. ¡Agrégalos para empezar!</p>';
             } else {
                 const header = document.createElement('div');
-                header.className = 'grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(0,1fr))] gap-4 font-semibold text-gray-300 text-sm mb-2 px-3';
+                header.className = 'grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(0,1fr))] gap-4 font-semibold stat-row-text-dark text-sm mb-2 px-3';
                 header.innerHTML = `
                     <span class="text-left">Atleta</span>
                     <span class="text-center">Pos</span>
