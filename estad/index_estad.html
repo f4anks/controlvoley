@@ -17,20 +17,25 @@
         -webkit-user-select: none;
         -moz-user-select: none;
         -ms-user-select: none;
+        /* Fondo Azul Oscuro Intenso */
+        background-color: #001C40; 
       }
       .card {
-        background-color: #1f2937;
-        border: 1px solid #374151;
+        /* Fondo de Tarjeta Azul Medianoche */
+        background-color: #003366;
+        border: 1px solid #004080; /* Borde más oscuro */
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+        /* Sombra Azul Oscura */
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
       }
       .card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        /* Sombra más luminosa/azulada en hover */
+        box-shadow: 0 10px 15px -3px rgba(0, 51, 102, 0.6), 0 4px 6px -2px rgba(0, 51, 102, 0.4);
       }
-      .score-positive { color: #4ade80; } /* Verde */
-      .score-negative { color: #f87171; } /* Rojo */
-      .score-neutral { color: #facc15; } /* Ámbar/Amarillo */ 
+      .score-positive { color: #4ade80; } /* Verde - Mantenido */
+      .score-negative { color: #f87171; } /* Rojo - Mantenido */
+      .score-neutral { color: #ffeb3b; } /* Amarillo más vivo */ 
 
       input[type=number]::-webkit-inner-spin-button,
       input[type=number]::-webkit-outer-spin-button {
@@ -42,9 +47,15 @@
       }
       
       input:focus, select:focus {
-        box-shadow: 0 0 0 2px #1f2937, 0 0 0 4px #4f46e5;
+        /* Foco Azul Eléctrico */
+        box-shadow: 0 0 0 2px #003366, 0 0 0 4px #0056FF;
       }
 
+      /* Modificación de colores Tailwind en HTML y JS: */
+      /* bg-gray-700 -> #004080 (Azul Intermedio) */
+      /* border-gray-600 -> #0056FF (Azul Eléctrico) */
+      /* bg-indigo-600/700 -> #0056FF (Azul Eléctrico) */
+      
       #actionSelect {
         color: #d1d5db;
       }
@@ -56,7 +67,7 @@
         width: 100%;
         max-width: 5xl;
         margin-top: 2rem;
-        border-top: 1px solid #374151; /* gray-700 */
+        border-top: 1px solid #004080; /* Borde de footer */
         font-size: 0.875rem; /* text-sm */
         color: #9ca3af; /* gray-400 */
       }
@@ -67,44 +78,44 @@
     </style>
   </head>
 
-  <body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-4">
+  <body class="text-white min-h-screen flex flex-col items-center p-4">
     <main class="w-full max-w-5xl mx-auto space-y-8 shadow-2xl">
       <header class="text-center relative">
-        <a href="../index_menu.html" class="absolute top-0 right-0 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md transition-colors text-sm" aria-label="Regresar al Menú">
+        <a href="../index_menu.html" class="absolute top-0 right-0 bg-[#004080] hover:bg-[#0056FF] text-white font-bold py-2 px-4 rounded-md transition-colors text-sm" aria-label="Regresar al Menú">
             Regresar al Menú
         </a>
 
         <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl">Control Voley Stats Tracker (Estadísticas)</h1>
-        <p class="mt-4 text-lg text-gray-400">Monitorea el rendimiento y la
+        <p class="mt-4 text-lg text-gray-300">Monitorea el rendimiento y la
           eficiencia de tus atletas.</p>
       </header>
       
       <div class="grid grid-cols-1 gap-8">
         <div class="space-y-6">
           <div class="card p-6 rounded-lg">
-            <h2 class="text-2xl font-semibold mb-4 border-b border-gray-700 pb-2">Agregar
+            <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2">Agregar
               Atleta</h2>
             <div class="flex flex-col sm:flex-row gap-4"> 
               <input id="playerNumberInput" placeholder="Nro." 
-                class="w-full sm:w-24 bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                class="w-full sm:w-24 bg-[#004080] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
                 type="number"> 
               <input id="playerNameInput" placeholder="Nombre del Atleta"
-                class="flex-grow bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                class="flex-grow bg-[#004080] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
                 type="text"> 
-              <button id="addPlayerBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition-colors">
+              <button id="addPlayerBtn" class="bg-[#0056FF] hover:bg-[#007bff] text-white font-bold py-2 px-4 rounded-md transition-colors">
                 Agregar 
               </button> 
             </div>
           </div>
           
           <div class="card p-6 rounded-lg">
-            <h2 class="text-2xl font-semibold mb-4 border-b border-gray-700 pb-2">Registrar
+            <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2">Registrar
               Acción</h2>
             <form id="actionForm" class="space-y-4">
               <div> 
                 <label for="playerSelect" class="block mb-2 text-sm font-medium text-gray-300">Seleccionar
                   Atleta</label>
-                <select id="playerSelect" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <select id="playerSelect" class="w-full bg-[#004080] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]">
                   <option disabled="disabled" selected="selected">Agregar atleta
                     primero</option>
                 </select>
@@ -112,17 +123,17 @@
               <div> 
                 <label for="actionSelect" class="block mb-2 text-sm font-medium text-gray-300">Tipo
                   de Acción</label>
-                <select id="actionSelect" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <select id="actionSelect" class="w-full bg-[#004080] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]">
                 </select>
               </div>
               <div class="hidden"> 
                 <label for="quantityInput" class="block mb-2 text-sm font-medium text-gray-300">Cantidad</label>
                 <input id="quantityInput" value="1" min="1" 
-                  class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  class="w-full bg-[#004080] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
                   type="number"> 
               </div>
               
-              <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition-colors">
+              <button type="submit" class="w-full bg-[#0056FF] hover:bg-[#007bff] text-white font-bold py-2 px-4 rounded-md transition-colors">
                 Registrar 
               </button> 
               
@@ -138,22 +149,22 @@
         </div>
         
         <div class="card p-6 rounded-lg">
-          <h2 class="text-2xl font-semibold mb-4 border-b border-gray-700 pb-2">Estadística por Atleta</h2>
+          <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2">Estadística por Atleta</h2>
           <div id="scoresContainer" class="space-y-3">
-            <p class="text-gray-500 text-center py-8">Aún no hay atletas.
+            <p class="text-gray-400 text-center py-8">Aún no hay atletas.
               ¡Agrégalos para empezar!</p>
           </div>
         </div>
         
         <div class="card p-6 rounded-lg mt-8">
-            <h2 class="text-2xl font-semibold mb-4 border-b border-gray-700 pb-2">Estadística General por Equipo</h2>
+            <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2">Estadística General por Equipo</h2>
             <div id="generalStatsContainer" class="space-y-3">
-                <p class="text-gray-500 text-center py-8">Registra acciones para ver el resumen.</p>
+                <p class="text-gray-400 text-center py-8">Registra acciones para ver el resumen.</p>
             </div>
         </div>
         
         <div class="card p-6 rounded-lg mt-8">
-            <h2 class="text-2xl font-semibold mb-4 border-b border-gray-700 pb-2">Gráfica General del Equipo (Positivos vs Negativos)</h2>
+            <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2">Gráfica General del Equipo (Positivos vs Negativos)</h2>
             <div class="h-96">
                 <canvas id="barChart"></canvas>
             </div>
@@ -162,7 +173,7 @@
       </div>
     </main>
 
-    <footer class="mt-8 border-t border-gray-700 text-gray-400 text-sm w-full max-w-5xl">
+    <footer class="mt-8 border-t border-[#004080] text-gray-400 text-sm w-full max-w-5xl">
         <p>Copyright © Empresa Sistematikos. Todos los derechos reservados.</p>
         <p>Diseñado por <strong>Sistematikos - Frank Hernandez</strong></p>
     </footer>
@@ -232,7 +243,7 @@
             } else if (actionValue < 0) {
                 actionSelect.style.color = '#f87171';
             } else {
-                actionSelect.style.color = '#facc15';
+                actionSelect.style.color = '#ffeb3b';
             }
         }
 
@@ -254,7 +265,7 @@
                 } else if (value < 0) {
                     option.style.color = '#f87171';
                 } else { 
-                    option.style.color = '#facc15';
+                    option.style.color = '#ffeb3b';
                 }
                 actionSelect.appendChild(option);
             });
@@ -350,7 +361,7 @@
             generalStatsContainer.innerHTML = '';
             
             if (actionLog.length === 0) {
-                generalStatsContainer.innerHTML = '<p class="text-gray-500 text-center py-8">Registra acciones para ver el resumen.</p>';
+                generalStatsContainer.innerHTML = '<p class="text-gray-400 text-center py-8">Registra acciones para ver el resumen.</p>';
                 renderBarChart({}); 
                 return;
             }
@@ -383,7 +394,7 @@
 
             // 3. Crear el encabezado de la tabla
             const header = document.createElement('div');
-            header.className = 'grid grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))] gap-4 font-semibold text-gray-400 text-sm mb-2 px-3';
+            header.className = 'grid grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))] gap-4 font-semibold text-gray-300 text-sm mb-2 px-3';
             header.innerHTML = `
                 <span class="text-left">Acción</span>
                 <span class="text-center">Pos</span>
@@ -406,7 +417,8 @@
                     chartData.negativeData.push(stats.negative); 
 
                     const rowDiv = document.createElement('div');
-                    rowDiv.className = 'grid grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))] gap-4 items-center bg-gray-700 p-3 rounded-md';
+                    // Usar un fondo más oscuro para las filas
+                    rowDiv.className = 'grid grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))] gap-4 items-center bg-[#004080] p-3 rounded-md';
 
                     const actionNameSpan = document.createElement('span');
                     actionNameSpan.className = 'font-bold text-gray-300';
@@ -459,10 +471,10 @@
 
             scoresContainer.innerHTML = '';
             if (players.length === 0) {
-                scoresContainer.innerHTML = '<p class="text-gray-500 text-center py-8">Aún no hay atletas. ¡Agrégalos para empezar!</p>';
+                scoresContainer.innerHTML = '<p class="text-gray-400 text-center py-8">Aún no hay atletas. ¡Agrégalos para empezar!</p>';
             } else {
                 const header = document.createElement('div');
-                header.className = 'grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(0,1fr))] gap-4 font-semibold text-gray-400 text-sm mb-2 px-3';
+                header.className = 'grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(0,1fr))] gap-4 font-semibold text-gray-300 text-sm mb-2 px-3';
                 header.innerHTML = `
                     <span class="text-left">Atleta</span>
                     <span class="text-center">Pos</span>
@@ -475,7 +487,8 @@
 
                 players.slice().sort((a, b) => b.score - a.score).forEach(player => {
                     const scoreDiv = document.createElement('div');
-                    scoreDiv.className = 'grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(0,1fr))] gap-4 items-center bg-gray-700 p-3 rounded-md';
+                    // Usar un fondo más oscuro para las filas
+                    scoreDiv.className = 'grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(0,1fr))] gap-4 items-center bg-[#004080] p-3 rounded-md';
 
                     const playerInfo = document.createElement('span');
                     playerInfo.className = 'truncate';
