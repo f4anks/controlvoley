@@ -17,36 +17,36 @@
         -webkit-user-select: none;
         -moz-user-select: none;
         -ms-user-select: none;
-        /* Fondo Azul Profundo (más intenso y atractivo) */
-        background-color: #001122; 
+        /* Fondo General Gris Oscuro */
+        background-color: #1f2937; 
       }
       .card {
-        /* Fondo de Tarjeta Azul Medianoche */
-        background-color: #002244;
-        border: 1px solid #0056FF; /* Borde Azul Eléctrico */
+        /* Fondo de Tarjeta Gris muy Oscuro (casi negro) */
+        background-color: #111827;
+        border: 1px solid #374151; /* Borde Gris */
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        /* Sombra Azul Profunda */
+        /* Sombra sutil en gris oscuro */
         box-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.5), 0 2px 5px -2px rgba(0, 0, 0, 0.3);
       }
       .card:hover {
         transform: translateY(-4px);
-        /* Sombra más luminosa/azulada en hover */
-        box-shadow: 0 12px 20px -5px rgba(0, 86, 255, 0.4), 0 5px 10px -3px rgba(0, 0, 0, 0.2);
+        /* Sombra con un toque de azul para foco */
+        box-shadow: 0 12px 20px -5px rgba(0, 86, 255, 0.2), 0 5px 10px -3px rgba(0, 0, 0, 0.2);
       }
       
-      /* Filas de Estadística con fondo CLARO para alto contraste */
+      /* Filas de Estadística con fondo CLARO (gris muy claro) */
       .stat-row-bg {
-        background-color: #e5e7eb; /* Gris muy claro / Tailwind gray-200 */
+        background-color: #f3f4f6; /* Gris muy claro / Tailwind gray-100 */
       }
       .stat-row-text-dark {
         color: #1f2937; /* Gris oscuro / Tailwind gray-800 */
       }
       
-      /* COLOR POSITIVO: Azul Zafiro Vivo (Mantenido) */
+      /* COLOR POSITIVO: Azul Zafiro Vivo (Mantenido para el acento) */
       .score-positive { color: #00A3FF; } 
-      /* COLOR NEGATIVO: Rojo (Mantenido) */
+      /* COLOR NEGATIVO: Rojo (Mantenido para el acento) */
       .score-negative { color: #dc2626; } 
-      /* COLOR NEUTRAL: Amarillo más vivo (Mantenido) */
+      /* COLOR NEUTRAL: Amarillo (Mantenido para el acento) */
       .score-neutral { color: #ffeb3b; } 
 
       input[type=number]::-webkit-inner-spin-button,
@@ -60,11 +60,12 @@
       
       input:focus, select:focus {
         /* Foco Azul Eléctrico */
-        box-shadow: 0 0 0 2px #002244, 0 0 0 4px #0056FF;
+        box-shadow: 0 0 0 2px #111827, 0 0 0 4px #0056FF;
       }
 
+      /* Texto de selects en modo oscuro (Tarjetas) */
       #actionSelect {
-        color: #d1d5db;
+        color: #d1d5db; 
       }
       
       /* Estilo básico para el footer */
@@ -74,7 +75,7 @@
         width: 100%;
         max-width: 5xl;
         margin-top: 2rem;
-        border-top: 1px solid #003366; 
+        border-top: 1px solid #374151; /* Borde gris oscuro */
         font-size: 0.875rem; 
         color: #9ca3af; 
       }
@@ -88,12 +89,12 @@
   <body class="text-white min-h-screen flex flex-col items-center p-4">
     <main class="w-full max-w-5xl mx-auto space-y-8 shadow-2xl">
       <header class="text-center relative">
-        <a href="../index_menu.html" class="absolute top-0 right-0 bg-[#002244] hover:bg-[#0056FF] border border-[#0056FF] text-white font-bold py-2 px-4 rounded-md transition-colors text-sm" aria-label="Regresar al Menú">
+        <a href="../index_menu.html" class="absolute top-0 right-0 bg-[#374151] hover:bg-[#0056FF] border border-[#0056FF] text-white font-bold py-2 px-4 rounded-md transition-colors text-sm" aria-label="Regresar al Menú">
             Regresar al Menú
         </a>
 
         <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">Control Voley <span class="text-[#00A3FF]">Stats Tracker</span></h1>
-        <p class="mt-4 text-lg text-gray-300 font-medium">Monitorea el rendimiento y la
+        <p class="mt-4 text-lg text-gray-400 font-medium">Monitorea el rendimiento y la
           eficiencia de tus atletas en tiempo real.</p>
       </header>
       
@@ -103,10 +104,10 @@
             <h2 class="text-2xl font-semibold mb-4 border-b border-[#0056FF] pb-2">Registrar Atleta</h2>
             <div class="flex flex-col sm:flex-row gap-4"> 
               <input id="playerNumberInput" placeholder="Nro." 
-                class="w-full sm:w-24 bg-[#003366] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
+                class="w-full sm:w-24 bg-[#1f2937] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
                 type="number"> 
               <input id="playerNameInput" placeholder="Nombre del Atleta"
-                class="flex-grow bg-[#003366] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
+                class="flex-grow bg-[#1f2937] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
                 type="text"> 
               <button id="addPlayerBtn" class="bg-[#0056FF] hover:bg-[#007bff] text-white font-bold py-2 px-4 rounded-md transition-colors shadow-lg">
                 Agregar 
@@ -121,7 +122,7 @@
               <div> 
                 <label for="playerSelect" class="block mb-2 text-sm font-medium text-gray-300">Seleccionar
                   Atleta</label>
-                <select id="playerSelect" class="w-full bg-[#003366] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]">
+                <select id="playerSelect" class="w-full bg-[#1f2937] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]">
                   <option disabled="disabled" selected="selected">Agregar atleta
                     primero</option>
                 </select>
@@ -129,13 +130,13 @@
               <div> 
                 <label for="actionSelect" class="block mb-2 text-sm font-medium text-gray-300">Tipo
                   de Acción</label>
-                <select id="actionSelect" class="w-full bg-[#003366] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]">
+                <select id="actionSelect" class="w-full bg-[#1f2937] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]">
                 </select>
               </div>
               <div class="hidden"> 
                 <label for="quantityInput" class="block mb-2 text-sm font-medium text-gray-300">Cantidad</label>
                 <input id="quantityInput" value="1" min="1" 
-                  class="w-full bg-[#003366] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
+                  class="w-full bg-[#1f2937] border border-[#0056FF] rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#0056FF]"
                   type="number"> 
               </div>
               
@@ -179,7 +180,7 @@
       </div>
     </main>
 
-    <footer class="mt-8 border-t border-[#003366] text-gray-400 text-sm w-full max-w-5xl">
+    <footer class="mt-8 border-t border-[#374151] text-gray-400 text-sm w-full max-w-5xl">
         <p>Copyright © Empresa Sistematikos. Todos los derechos reservados.</p>
         <p>Diseñado por <strong>Sistematikos - Frank Hernandez</strong></p>
     </footer>
@@ -427,7 +428,7 @@
                     chartData.negativeData.push(stats.negative); 
 
                     const rowDiv = document.createElement('div');
-                    // Usar la clase clara para el fondo de la fila
+                    // Usar la clase clara para el fondo de la fila (gris claro)
                     rowDiv.className = 'grid grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))] gap-4 items-center stat-row-bg p-3 rounded-md';
 
                     const actionNameSpan = document.createElement('span');
@@ -497,7 +498,7 @@
 
                 players.slice().sort((a, b) => b.score - a.score).forEach(player => {
                     const scoreDiv = document.createElement('div');
-                    // Usar la clase clara para el fondo de la fila
+                    // Usar la clase clara para el fondo de la fila (gris claro)
                     scoreDiv.className = 'grid grid-cols-[minmax(0,2fr)_repeat(5,minmax(0,1fr))] gap-4 items-center stat-row-bg p-3 rounded-md';
 
                     const playerInfo = document.createElement('span');
