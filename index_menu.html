@@ -11,7 +11,7 @@
         :root {
             --color-azul-marino: #001F3F;    /* Azul Marino */
             --color-azul-electrico: #0074D9; /* Azul Eléctrico */
-            --color-fondo-claro: #f0f8ff; /* Azure/Azul muy pálido */
+            --color-fondo-claro: #f0f8ff;    /* Azure/Azul muy pálido */
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -21,14 +21,16 @@
         .azul-marino-hover:hover { background-color: #001a33; }
         .azul-electrico-text { color: var(--color-azul-electrico); }
         .rounded-xl { border-radius: 0.75rem; }
-        .shadow-lg-azul { box-shadow: 0 0 20px -5px rgba(0, 31, 63, 0.4); } /* Sombra más fuerte para cards */
+        .shadow-lg-azul { box-shadow: 0 0 20px -5px rgba(0, 31, 63, 0.4); }
         
-        /* Estilo para el BANNER (Usando Azul Marino) */
+        /* Estilo para el BANNER (Usando la imagen de fondo de la carpeta img) */
         .banner-header {
-            background-color: var(--color-azul-marino);
-            color: white;
-            padding: 1rem 0;
-            text-align: center;
+            background-image: url('img/banner.png'); /* Ruta de la imagen */
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat;
+            min-height: 100px; /* Altura mínima para que la imagen sea visible */
+            width: 100%;
         }
         .card-menu {
             transition: transform 0.3s, box-shadow 0.3s;
@@ -44,7 +46,6 @@
 <body class="min-h-screen flex flex-col">
 
     <div class="banner-header">
-        <h1 class="text-2xl font-bold">LIGA VENEZOLANA DE VOLEIBOL DE PLAYA MASCULINA Y FEMENINA</h1>
     </div>
     <div id="loading-screen" class="absolute inset-0 flex items-center justify-center bg-gray-50 z-50">
         <div class="text-center">
@@ -54,8 +55,9 @@
     </div>
 
     <div id="main-content" class="container mx-auto p-4 md:p-8 flex-grow hidden">
-        <header class="mb-8 pt-4 flex justify-between items-center border-b pb-4">
-            <h1 class="text-3xl font-extrabold text-gray-900">
+        
+        <header class="mb-8 pt-4 flex flex-col md:flex-row justify-between items-center border-b pb-4">
+            <h1 class="text-3xl font-extrabold text-gray-900 mb-4 md:mb-0">
                 Bienvenido, <span id="clubNameDisplay" class="azul-electrico-text"></span>
             </h1>
             <button onclick="logout()" class="py-2 px-4 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-200 shadow-md flex items-center">
@@ -128,29 +130,32 @@
             if (user) {
                 // Usuario logueado
                 if (clubName === 'Club Principal' || clubName === 'Club' || !localStorage.getItem('currentClub')) {
+                    // Obtiene el nombre del club del email (antes del @) y lo capitaliza
                     clubName = user.email ? user.email.split('@')[0].charAt(0).toUpperCase() + user.email.split('@')[0].slice(1) : 'Club Logueado';
                     localStorage.setItem('currentClub', clubName);
                 }
                 
                 clubNameDisplay.textContent = clubName;
                 
+                // Ocultar carga y mostrar contenido
                 loadingScreen.classList.add('hidden');
                 mainContent.classList.remove('hidden');
 
             } else {
-                // Usuario no logueado, redirigir
+                // Usuario no logueado, redirigir a la página de inicio
                 console.log("Sesión no encontrada. Redirigiendo a index.html");
-                window.location.href = 'index.html'; 
+                window.location.href = 'index.html'; // Tu página de login
             }
         });
 
 
         /**
-         * Cierra la sesión de Firebase y redirige.
+         * Cierra la sesión de Firebase y redirige a la página de login.
          */
         window.logout = async function() {
             try {
                 await signOut(auth);
+                // Limpiar el nombre del club guardado localmente al cerrar sesión
                 localStorage.removeItem('currentClub'); 
                 window.location.href = 'index.html';
             } catch (error) {
