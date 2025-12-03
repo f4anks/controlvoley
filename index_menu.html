@@ -3,10 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menú Principal LVMEL</title>
+    <title>Menú Principal - Control Voley</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
     <script>
+        // CONFIGURACIÓN Y INICIALIZACIÓN DE FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyB5RB7mm1j-0gjCNTUEJTkyEqLjyZ3C7ws",
+            authDomain: "datacontrolvoley-ff556.firebaseapp.com",
+            projectId: "datacontrolvoley-ff556",
+            storageBucket: "datacontrolvoley-ff556.firebasestorage.app",
+            messagingSenderId: "516409072606",
+            appId: "1:516409072606:web:132538dba358a076d71b4f"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth(); 
+
+        // CONFIGURACIÓN DE TAILWIND CSS (Mismo tema)
         tailwind.config = {
             theme: {
                 extend: {
@@ -14,6 +32,8 @@
                         'voley-blue': '#1e40af', // Azul fuerte (Blue 800)
                         'voley-dark': '#1e3a8a', // Azul oscuro (Blue 900)
                         'voley-light': '#eff6ff', // Azul muy claro (Blue 50)
+                        'btn-primary': '#1e40af', 
+                        'btn-hover': '#1e3a8a', 
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -22,154 +42,100 @@
             }
         }
     </script>
+    
     <style>
-        /* Estilo para el contenedor principal y el fondo */
-        .hero-section {
-            /* Usamos una imagen de fondo de voleibol (placeholder) */
-            background-image: url('https://placehold.co/1920x1080/0e1b3e/ffffff?text=Voleibol');
-            background-size: cover;
-            background-position: center;
-            position: relative;
-            z-index: 0;
-        }
-
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            left: 0;
-            /* Degradado de oscuro a transparente */
-            background: linear-gradient(135deg, rgba(30, 64, 175, 0.9) 0%, rgba(30, 64, 175, 0.7) 40%, rgba(30, 64, 175, 0.5) 100%);
-            z-index: -1;
-        }
-
-        /* Animación sutil para los botones al cargar */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in {
-            animation: fadeIn 0.6s ease-out forwards;
-        }
+        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06); }
+        .bg-card { background-color: #ffffff; }
     </style>
 </head>
-<body class="bg-voley-light font-sans min-h-screen flex flex-col items-center">
 
-    <section class="hero-section w-full flex-grow flex flex-col items-center justify-center py-16 px-4 sm:px-6 lg:px-8">
-        
-        <div class="max-w-4xl w-full text-center p-8 md:p-12 rounded-xl shadow-2xl backdrop-blur-sm bg-white/10 border border-white/20 relative">
-            
-            <div class="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-voley-dark/80 rounded-t-xl backdrop-blur-sm shadow-lg border-b border-white/20">
-                
-                <div class="flex items-center">
-                    <span class="text-sm sm:text-lg font-medium text-white/90 mr-3">Club Activo:</span>
-                    <span id="currentClubDisplay" class="text-base sm:text-xl font-bold text-voley-light py-1 px-3 bg-voley-blue rounded-full shadow-md">Cargando...</span>
-                </div>
+<body class="bg-voley-light font-sans min-h-screen flex flex-col">
 
-                <button id="logoutButton" class="py-2 px-3 sm:py-2 sm:px-4 bg-red-600 text-white font-semibold rounded-lg text-sm sm:text-base hover:bg-red-700 transition duration-200 flex items-center shadow-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Cerrar Sesión
-                </button>
-            </div>
-            
-            <div class="pt-24">
-                
-                <div class="w-full mb-8">
-                    <img src="img/banner.png" alt="Banner Control Voley" class="w-full h-auto rounded-lg shadow-2xl" onerror="this.onerror=null;this.src='https://placehold.co/800x150/1e40af/ffffff?text=Banner+Control+Voley+Horizontal'">
-                </div>
-
-                <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-4 drop-shadow-lg leading-tight">
-                    Gestiona y Controla tu equipo de Voleibol de manera Simplificada y Potenciada
-                </h1>
-
-                <div class="mb-10"></div>
-
-
-                <div class="bg-white p-6 sm:p-8 rounded-lg shadow-xl mb-12 transform transition duration-500 hover:scale-[1.02]">
-                    <h2 class="text-2xl sm:text-3xl font-bold text-voley-dark mb-4">
-                        Administración Integral
-                    </h2>
-                    <p class="text-lg text-gray-700 leading-relaxed">
-                        Control Voley te permite gestionar todos los aspectos cruciales de tu club: *Datos de Atletas*, *Administración de pagos y vencimientos*, *Llevar estadísticas de juego*, y el seguimiento de *Cumpleaños* de cada atleta.                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6">
-                    
-                    <a href="index_atletas.html" class="animate-fade-in delay-100">
-                        <button class="w-full bg-voley-blue text-white py-4 px-6 rounded-lg font-bold text-lg shadow-lg hover:bg-voley-dark transition duration-300 transform hover:scale-105 border-b-4 border-blue-900">
-                            Nómina de Atletas
-                        </button>
-                    </a>
-
-                    <a href="estad/index_estad.html" class="animate-fade-in delay-200">
-                        <button class="w-full bg-voley-blue text-white py-4 px-6 rounded-lg font-bold text-lg shadow-lg hover:bg-voley-dark transition duration-300 transform hover:scale-105 border-b-4 border-blue-900">
-                            Estadísticas de Juego
-                        </button>
-                    </a>
-
-                    <a href="index_pagos.html" class="animate-fade-in delay-300">
-                        <button class="w-full bg-voley-blue text-white py-4 px-6 rounded-lg font-bold text-lg shadow-lg hover:bg-voley-dark transition duration-300 transform hover:scale-105 border-b-4 border-blue-900">
-                            Gestión Financiera
-                        </button>
-                    </a>
-
-                    <a href="index_cumple.html" class="animate-fade-in delay-400">
-                        <button class="w-full bg-voley-blue text-white py-4 px-6 rounded-lg font-bold text-lg shadow-lg hover:bg-voley-dark transition duration-300 transform hover:scale-105 border-b-4 border-blue-900">
-                            Cumpleaños del Mes
-                        </button>
-                    </a>
-                </div>
-
-                <p class="mt-8 text-sm text-white/80">
-                    Haz clic en la función que deseas administrar.
-                </p>
-            </div>
+    <header class="bg-voley-dark shadow-lg py-4 px-6 md:px-12 flex justify-between items-center">
+        <h1 class="text-3xl font-extrabold text-white">
+            Menú Principal
+        </h1>
+        <div class="flex items-center space-x-4">
+            <span id="clubDisplay" class="text-lg font-semibold text-voley-light py-1 px-3 bg-voley-blue rounded-full">Cargando Club...</span>
+            <button id="logoutButton" class="py-2 px-4 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-300">
+                Cerrar Sesión
+            </button>
         </div>
-    </section>
+    </header>
 
-    <footer class="w-full py-4 text-center bg-voley-dark shadow-inner">
+    <main class="flex-grow p-8 md:p-12">
+        <h2 class="text-3xl font-bold text-voley-dark mb-8">Opciones del Sistema</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <a href="index_atletas.html" class="bg-card p-6 rounded-xl card-shadow border-t-4 border-voley-blue hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+                <div class="text-voley-blue mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20h2v-2a3 3 0 00-5.356-1.857M9 20H4v-2a3 3 0 015-2.236M9 20A5.966 5.966 0 0012 16.5m1.383-2.61a3 3 0 114.743-1.889M12 11.25V12m-4.5-5.25v2.25M9 8.25h.008M12 21.75V15m-4.5 5.25h9V15m-9-3.75h9m-4.5 3.75h.008" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-voley-dark mb-2">Gestión de Atletas</h3>
+                <p class="text-gray-600">Registra, edita y consulta la nómina completa de tu club. Datos personales y deportivos.</p>
+            </a>
+
+            <a href="index_nomina.html" class="bg-card p-6 rounded-xl card-shadow border-t-4 border-voley-blue hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+                <div class="text-voley-blue mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-voley-dark mb-2">Nómina y Pagos</h3>
+                <p class="text-gray-600">Lleva el control de salarios, fechas de pago y estado de solvencia de cada atleta.</p>
+            </a>
+            
+            <a href="index_estadisticas.html" class="bg-card p-6 rounded-xl card-shadow border-t-4 border-voley-blue hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
+                <div class="text-voley-blue mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l7 7V6M5 19V6M19 19V6" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-voley-dark mb-2">Estadísticas de Juego</h3>
+                <p class="text-gray-600">Registra y analiza el desempeño de tu equipo en cada partido y torneo.</p>
+            </a>
+        </div>
+    </main>
+
+    <footer class="w-full py-3 text-center bg-voley-dark shadow-inner">
         <p class="text-sm text-white/70">
             &copy; 2023 Todos los derechos reservados a Sistematikos - Frank Hernandez
         </p>
     </footer>
 
     <script>
-        const currentClubId = localStorage.getItem('currentClub');
-        const currentClubDisplay = document.getElementById('currentClubDisplay');
-        const logoutButton = document.getElementById('logoutButton');
+        document.addEventListener('DOMContentLoaded', () => {
+            const clubDisplay = document.getElementById('clubDisplay');
+            const clubName = localStorage.getItem('currentClub');
+            const logoutButton = document.getElementById('logoutButton');
 
-        /**
-         * 1. Verificar sesión y mostrar el nombre del club.
-         */
-        if (currentClubId && currentClubId !== 'null') {
-            currentClubDisplay.textContent = currentClubId;
-        } else {
-            currentClubDisplay.textContent = 'Acceso Denegado';
-            console.warn('No se encontró club en localStorage. Redirigiendo a login.');
-            // Redirigir si no hay club para evitar acceso no autorizado
-            setTimeout(() => {
-                 // Asumiendo que tu página de login es index.html
-                 window.location.href = 'index.html'; 
-            }, 500);
-        }
+            if (clubName) {
+                clubDisplay.textContent = clubName;
+            }
 
-        /**
-         * 2. Función para cerrar sesión.
-         */
-        logoutButton.addEventListener('click', () => {
-            // Limpiar el ID del club del almacenamiento local
-            localStorage.removeItem('currentClub'); 
-            
-            // Redirigir a la página de login (index.html)
-            window.location.href = 'index.html'; 
+            // 1. Verificación de Sesión
+            auth.onAuthStateChanged((user) => {
+                if (!user) {
+                    // Si no hay usuario logueado, redirige al inicio
+                    localStorage.removeItem('currentClub');
+                    window.location.href = 'index.html';
+                }
+            });
+
+            // 2. Lógica para Cerrar Sesión
+            logoutButton.addEventListener('click', () => {
+                auth.signOut().then(() => {
+                    localStorage.removeItem('currentClub');
+                    window.location.href = 'index.html';
+                }).catch((error) => {
+                    console.error("Error al cerrar sesión:", error);
+                    alert("Ocurrió un error al cerrar la sesión. Intenta nuevamente.");
+                });
+            });
         });
     </script>
-
 </body>
 </html>
-
-
