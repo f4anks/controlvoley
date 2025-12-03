@@ -181,14 +181,15 @@
         // Importaciones de Firebase SDK (v11.6.1)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, addDoc, onSnapshot, collection, query, where, setDoc, deleteDoc, setLogLevel, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // NOTA: Se ha quitado 'where' porque el filtro es implícito en la ruta de la subcolección
+        import { getFirestore, doc, addDoc, onSnapshot, collection, query, setDoc, deleteDoc, setLogLevel, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Establecer nivel de log para depuración de Firestore
         setLogLevel('Debug');
 
         // --- Configuración de Firebase y Variables Globales ---
-        const ATHLETES_COLLECTION = 'atletas'; 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // 📌 La colección base ya no se usa, pero mantenemos la constante para claridad.
+        const CLUBS_COLLECTION = 'clubs'; 
         
         // 📌 Configuración de Firebase (usando la estática que proporcionaste)
         let firebaseConfig = {
@@ -207,7 +208,6 @@
         
         // ** Club ID Dinámico (Recuperado de localStorage) **
         let currentClubId = localStorage.getItem('currentClub') || 'Angeles'; 
-        // HACER ESTA VARIABLE GLOBAL explícitamente para el onclick
         window.athleteToEditId = null; 
 
         // Elementos de UI
@@ -222,6 +222,15 @@
         // --- Funciones de Utilidad y Navegación ---
 
         /**
+         * 📌 NUEVA FUNCIÓN: Obtiene la referencia a la subcolección de atletas del club actual.
+         * Ruta: /clubs/{currentClubId}/atletas
+         */
+        const getAthletesCollectionRef = () => {
+             if (!db) throw new Error("Firestore no inicializado.");
+             return collection(db, CLUBS_COLLECTION, currentClubId, 'atletas');
+        };
+
+        /**
          * Navega entre las vistas principales: 'table' (tabla de atletas) o 'form' (formulario de registro/edición).
          * @param {string} viewName - 'table' o 'form'
          */
@@ -231,7 +240,7 @@
             if (viewName === 'table') {
                 document.getElementById('data-table-view').classList.remove('hidden');
                 if (currentClubId && isAuthReady && userId) {
-                    loadAthletes(); 
+                    loadAthletes(); // Cargar atletas solo si todo está listo
                 }
             } else if (viewName === 'form') {
                 document.getElementById('form-edit-view').classList.remove('hidden');
@@ -413,8 +422,9 @@
             }
 
             try {
-                // Referencia directa al documento de atleta
-                await deleteDoc(doc(db, ATHLETES_COLLECTION, athleteId));
+                // 📌 Referencia al documento en la subcolección: /clubs/{clubId}/atletas/{athleteId}
+                const docRef = doc(getAthletesCollectionRef(), athleteId);
+                await deleteDoc(docRef);
                 
                 alert(`Atleta ${athleteName} eliminado con éxito.`);
             } catch (error) {
@@ -446,7 +456,8 @@
 
             try {
                 const athleteData = {
-                    clubId: currentClubId,
+                    // Mantenemos clubId por si se necesita consultar el club padre fácilmente, aunque ya está en la ruta.
+                    clubId: currentClubId, 
                     nombre: document.getElementById('nombre').value.trim(),
                     apellido: document.getElementById('apellido').value.trim(),
                     fechaNacimiento: document.getElementById('fechaNacimiento').value,
@@ -463,13 +474,14 @@
                 let successMessage = '';
 
                 if (window.athleteToEditId) {
-                    // MODO EDICIÓN: setDoc para actualizar (merge)
-                    await setDoc(doc(db, ATHLETES_COLLECTION, window.athleteToEditId), athleteData, { merge: true });
+                    // 📌 MODO EDICIÓN: setDoc en la subcolección
+                    const docRef = doc(getAthletesCollectionRef(), window.athleteToEditId);
+                    await setDoc(docRef, athleteData, { merge: true });
                     successMessage = `Atleta ${athleteData.nombre} actualizado con éxito. Regresando a la tabla...`;
                 } else {
-                    // MODO NUEVO: addDoc para crear
+                    // 📌 MODO NUEVO: addDoc en la subcolección
                     athleteData.createdAt = serverTimestamp(); 
-                    await addDoc(collection(db, ATHLETES_COLLECTION), athleteData);
+                    await addDoc(getAthletesCollectionRef(), athleteData);
                     successMessage = `Atleta ${athleteData.nombre} registrado con éxito. Regresando a la tabla...`;
                 }
 
@@ -515,11 +527,8 @@
 
             document.getElementById('loadingMessage').textContent = `Cargando atletas de ${currentClubId}...`;
             
-            // 📌 Consulta Filtrada
-            const q = query(
-                collection(db, ATHLETES_COLLECTION),
-                where('clubId', '==', currentClubId)
-            );
+            // 📌 Consulta a la Subcolección (¡No necesita filtro 'where'!)
+            const q = query(getAthletesCollectionRef());
 
             // Listener en tiempo real
             unsubscribeAthletes = onSnapshot(q, (snapshot) => {
