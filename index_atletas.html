@@ -74,7 +74,7 @@
         <div id="data-table-view" class="main-view flex-grow">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold text-gray-800">Atletas Registrados (<span id="athleteCount">0</span>)</h2>
-                <button onclick="athleteToEditId = null; navigateTo('form');" class="py-2 px-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-200 shadow-md">
+                <button onclick="window.athleteToEditId = null; window.navigateTo('form');" class="py-2 px-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-200 shadow-md">
                     + Registrar Nuevo Atleta
                 </button>
             </div>
@@ -102,7 +102,7 @@
 
         <div id="form-edit-view" class="main-view hidden">
             <div class="mb-6 flex justify-end">
-                <button onclick="navigateTo('table')" class="py-2 px-4 bg-gray-500 text-white font-semibold rounded-lg hover:bg-gray-600 transition duration-200 shadow-md">
+                 <button onclick="window.navigateTo('table')" class="py-2 px-4 bg-gray-500 text-white font-semibold rounded-lg hover:bg-gray-600 transition duration-200 shadow-md">
                     <span class="flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -114,7 +114,7 @@
 
             <section class="bg-white p-6 rounded-xl shadow-lg-azul w-full max-w-2xl mx-auto">
                 <h2 id="formTitle" class="text-xl font-bold mb-4 border-b pb-2 azul-electrico-text">Registro de Nuevo Atleta</h2>
-                <form id="athleteForm" onsubmit="saveAthlete(event)">
+                <form id="athleteForm" onsubmit="window.saveAthlete(event)">
 
                     <h3 class="font-semibold mt-4 mb-2 azul-marino-bg text-white p-2 rounded-md">1. Datos del Atleta</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -187,7 +187,7 @@
         setLogLevel('Debug');
 
         // --- Configuración de Firebase y Variables Globales ---
-        const ATHLETES_COLLECTION = 'atletas'; // <-- Colección Simplificada
+        const ATHLETES_COLLECTION = 'atletas'; 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
         // 📌 Configuración de Firebase (usando la estática que proporcionaste)
@@ -207,7 +207,8 @@
         
         // ** Club ID Dinámico (Recuperado de localStorage) **
         let currentClubId = localStorage.getItem('currentClub') || 'Angeles'; 
-        let athleteToEditId = null; // Almacena el ID del documento de Firestore a editar
+        // HACER ESTA VARIABLE GLOBAL explícitamente para el onclick
+        window.athleteToEditId = null; 
 
         // Elementos de UI
         const saveButton = document.getElementById('saveButton');
@@ -222,13 +223,13 @@
 
         /**
          * Navega entre las vistas principales: 'table' (tabla de atletas) o 'form' (formulario de registro/edición).
+         * @param {string} viewName - 'table' o 'form'
          */
         window.navigateTo = function(viewName) {
             document.querySelectorAll('.main-view').forEach(el => el.classList.add('hidden'));
 
             if (viewName === 'table') {
                 document.getElementById('data-table-view').classList.remove('hidden');
-                // Al volver a la tabla, aseguramos que los datos estén cargados
                 if (currentClubId && isAuthReady && userId) {
                     loadAthletes(); 
                 }
@@ -238,7 +239,7 @@
                 document.getElementById('saveMessage').classList.add('hidden'); // Ocultar mensajes de guardado previos
                 
                 // Lógica para el Título del Formulario
-                if (athleteToEditId) {
+                if (window.athleteToEditId) {
                     formTitle.textContent = 'Editar Atleta Existente';
                 } else {
                     formTitle.textContent = 'Registro de Nuevo Atleta';
@@ -250,8 +251,6 @@
          * Actualiza el estado del botón Guardar y el mensaje de conexión.
          */
         function updateSaveButtonState() {
-             // Lógica de estado omitida aquí por brevedad, asume que usa la del código anterior
-             // DEJAR ESTA FUNCIÓN COMPLETA EN EL CÓDIGO FINAL
              if (!currentClubId || currentClubId === 'null') { 
                 saveButton.disabled = true;
                 connectionStatusElement.textContent = 'ERROR: Club ID no definido. Inicie sesión.';
@@ -361,7 +360,7 @@
                     updateSaveButtonState(); 
                     
                     if (currentClubId && isAuthReady && userId) {
-                        navigateTo('table'); // Cargar la tabla si todo está listo
+                        window.navigateTo('table'); // Cargar la tabla si todo está listo
                     } else if (currentClubId && isAuthReady && !userId) {
                         document.getElementById('loadingMessage').textContent = 'Fallo al autenticar. Verifique las Reglas de Seguridad y Auth Anónimo.';
                     }
@@ -384,9 +383,10 @@
         
         /**
          * Carga los datos de un atleta en el formulario para su edición.
+         * Se adjunta a window para que sea accesible desde onclick.
          */
         window.editAthlete = function(athleteData) {
-            athleteToEditId = athleteData.id;
+            window.athleteToEditId = athleteData.id;
 
             // 1. Rellenar los campos del formulario
             document.getElementById('nombre').value = athleteData.nombre || '';
@@ -400,11 +400,12 @@
             document.getElementById('ultimaFechaPago').value = athleteData.ultimaFechaPago === 'N/A' ? '' : athleteData.ultimaFechaPago;
 
             // 2. Navegar a la vista del formulario
-            navigateTo('form');
+            window.navigateTo('form');
         }
 
         /**
          * Elimina un atleta de Firestore.
+         * Se adjunta a window para que sea accesible desde onclick.
          */
         window.deleteAthlete = async function(athleteId, athleteName) {
             if (!confirm(`¿Estás seguro de ELIMINAR permanentemente a ${athleteName} del club ${currentClubId}?`)) {
@@ -412,9 +413,9 @@
             }
 
             try {
+                // Referencia directa al documento de atleta
                 await deleteDoc(doc(db, ATHLETES_COLLECTION, athleteId));
                 
-                // No necesita recargar, onSnapshot se encarga de la actualización en tiempo real
                 alert(`Atleta ${athleteName} eliminado con éxito.`);
             } catch (error) {
                 console.error("Error al eliminar el atleta:", error);
@@ -424,6 +425,7 @@
 
         /**
          * Guarda (agrega) o Actualiza (set/merge) un atleta en Firestore.
+         * Se adjunta a window para que sea accesible desde onsubmit.
          */
         window.saveAthlete = async function(event) {
             event.preventDefault();
@@ -435,4 +437,184 @@
                 return;
             }
 
-            const saveMessage =
+            const saveMessage = document.getElementById('saveMessage');
+            
+            saveMessage.classList.add('hidden');
+            saveButton.disabled = true; 
+            saveButton.textContent = 'Guardando...';
+            isSaving = true;
+
+            try {
+                const athleteData = {
+                    clubId: currentClubId,
+                    nombre: document.getElementById('nombre').value.trim(),
+                    apellido: document.getElementById('apellido').value.trim(),
+                    fechaNacimiento: document.getElementById('fechaNacimiento').value,
+                    telefono: document.getElementById('telefono').value.trim(),
+                    peso: parseFloat(document.getElementById('peso').value),
+                    talla: parseFloat(document.getElementById('talla').value),
+                    montoPago: parseFloat(document.getElementById('montoPago').value), 
+                    frecuenciaPago: document.getElementById('frecuenciaPago').value,
+                    ultimaFechaPago: document.getElementById('ultimaFechaPago').value || 'N/A',
+                    userId: userId, 
+                    updatedAt: serverTimestamp(),
+                };
+
+                let successMessage = '';
+
+                if (window.athleteToEditId) {
+                    // MODO EDICIÓN: setDoc para actualizar (merge)
+                    await setDoc(doc(db, ATHLETES_COLLECTION, window.athleteToEditId), athleteData, { merge: true });
+                    successMessage = `Atleta ${athleteData.nombre} actualizado con éxito. Regresando a la tabla...`;
+                } else {
+                    // MODO NUEVO: addDoc para crear
+                    athleteData.createdAt = serverTimestamp(); 
+                    await addDoc(collection(db, ATHLETES_COLLECTION), athleteData);
+                    successMessage = `Atleta ${athleteData.nombre} registrado con éxito. Regresando a la tabla...`;
+                }
+
+                saveMessage.textContent = successMessage;
+                saveMessage.classList.remove('hidden');
+                saveMessage.style.color = 'green';
+                
+                window.athleteToEditId = null; // Limpiar ID de edición
+
+                setTimeout(() => {
+                    window.navigateTo('table');
+                }, 1000); 
+
+            } catch (error) {
+                console.error("Error al guardar el atleta en Firestore:", error);
+                saveMessage.textContent = `Error al guardar: ${error.message}. Revise la consola.`;
+                saveMessage.classList.remove('hidden');
+                saveMessage.style.color = 'red';
+            } finally {
+                saveButton.textContent = 'Guardar Atleta y Nómina';
+                isSaving = false;
+                updateSaveButtonState(); 
+            }
+        }
+        
+        /**
+         * Carga los atletas del club actual en tiempo real usando onSnapshot.
+         */
+        let unsubscribeAthletes = null; 
+
+        function loadAthletes() {
+            if (unsubscribeAthletes) {
+                unsubscribeAthletes();
+                unsubscribeAthletes = null;
+            }
+            
+            document.getElementById('firestoreErrorMessage').classList.add('hidden');
+
+            if (!isAuthReady || !currentClubId || !db || !userId) {
+                 document.getElementById('loadingMessage').textContent = 'Error: No se puede cargar. Base de datos no lista o club no seleccionado.';
+                 return;
+            }
+
+            document.getElementById('loadingMessage').textContent = `Cargando atletas de ${currentClubId}...`;
+            
+            // 📌 Consulta Filtrada
+            const q = query(
+                collection(db, ATHLETES_COLLECTION),
+                where('clubId', '==', currentClubId)
+            );
+
+            // Listener en tiempo real
+            unsubscribeAthletes = onSnapshot(q, (snapshot) => {
+                const athletes = [];
+                snapshot.forEach((doc) => {
+                    athletes.push({ id: doc.id, ...doc.data() });
+                });
+                
+                athletes.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+                renderAthletesTable(athletes);
+                document.getElementById('athleteCount').textContent = athletes.length;
+                document.getElementById('loadingMessage').textContent = ''; 
+                document.getElementById('firestoreErrorMessage').classList.add('hidden');
+
+            }, (error) => {
+                console.error("Error al escuchar cambios en Firestore:", error);
+                document.getElementById('loadingMessage').textContent = 'Fallo de carga en tiempo real.';
+                document.getElementById('firestoreErrorMessage').textContent = `ERROR DE FIRESTORE: ${error.message}. Verifica las reglas de seguridad.`;
+                document.getElementById('firestoreErrorMessage').classList.remove('hidden');
+            });
+        }
+        
+        /**
+         * Renderiza los atletas en la tabla HTML.
+         */
+        function renderAthletesTable(athletes) {
+            const tableBody = document.getElementById('athletesTableBody');
+            tableBody.innerHTML = ''; 
+
+            if (athletes.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">No hay atletas registrados para este club. ¡Regista uno nuevo!</td></tr>';
+                return;
+            }
+
+            athletes.forEach(athlete => {
+                const imc = calculateIMC(athlete.peso, athlete.talla);
+                const imcStatusClass = getIMCStatus(imc);
+                const age = calculateAge(athlete.fechaNacimiento);
+                
+                const paymentAmount = athlete.montoPago || athlete.salarioBase || 0; 
+                
+                const salaryFormatted = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                }).format(paymentAmount);
+
+                const lastPayment = athlete.ultimaFechaPago || 'N/A';
+                
+                const paymentStatus = getPaymentStatus(lastPayment);
+
+                // Escapar el nombre para pasarlo a la función deleteAthlete (por si tiene comillas)
+                const fullName = `${athlete.nombre} ${athlete.apellido}`;
+                const escapedName = fullName.replace(/'/g, "\\'"); 
+                
+                // Objeto para la función editAthlete, convertido a JSON y escapado
+                const athleteDataJson = JSON.stringify(athlete).replace(/'/g, "\\'");
+
+                const row = `
+                    <tr class="hover:bg-gray-100">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${fullName}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${age} años</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${imcStatusClass}">
+                                IMC: ${imc}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">${salaryFormatted}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${lastPayment}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                             <span class="px-2 inline-flex text-xs leading-5 rounded-full ${paymentStatus.class}">
+                                 ${paymentStatus.status}
+                             </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                             <button onclick='window.editAthlete(${athleteDataJson})' 
+                                    class="text-indigo-600 hover:text-indigo-900 transition font-bold">
+                                Editar
+                            </button>
+                            <button onclick="window.deleteAthlete('${athlete.id}', '${escapedName}')" 
+                                    class="text-red-600 hover:text-red-900 transition font-bold">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+        
+        // Bloquear el menú contextual (clic derecho) para una experiencia de aplicación
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+    </script>
+
+</body>
+</html>
