@@ -30,7 +30,7 @@
             background-size: cover; 
             background-position: center; 
             background-repeat: no-repeat;
-            min-height: 250px; /* Altura 250px */
+            min-height: 250px; 
             width: 100%;
         }
         /* Estilos específicos para la tabla y formularios */
@@ -67,6 +67,10 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
+                        <label for="cedulaIdentidad" class="block text-sm font-medium text-gray-700">Cédula de Identidad</label>
+                        <input type="text" id="cedulaIdentidad" inputmode="numeric" pattern="[0-9]*" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2" title="Solo se permiten números.">
+                    </div>
+                    <div>
                         <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
                         <input type="text" id="nombre" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
                     </div>
@@ -74,11 +78,11 @@
                         <label for="apellido" class="block text-sm font-medium text-gray-700">Apellido</label>
                         <input type="text" id="apellido" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
                     </div>
+                    
                     <div>
                         <label for="fechaNacimiento" class="block text-sm font-medium text-gray-700">Fecha de Nacimiento</label>
                         <input type="date" id="fechaNacimiento" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
                     </div>
-                    
                     <div>
                         <label for="talla" class="block text-sm font-medium text-gray-700">Talla (m)</label>
                         <input type="number" id="talla" step="0.01" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
@@ -87,22 +91,20 @@
                         <label for="peso" class="block text-sm font-medium text-gray-700">Peso (kg)</label>
                         <input type="number" id="peso" step="0.1" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
                     </div>
+
                     <div>
-                        <label for="posicion" class="block text-sm font-medium text-gray-700">Posición</label>
-                        <select id="posicion" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                        <label for="tipoNomina" class="block text-sm font-medium text-gray-700">Tipo de Nómina</label>
+                        <select id="tipoNomina" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
                             <option value="">Seleccione...</option>
-                            <option value="Armador">Armador</option>
-                            <option value="Central">Central</option>
-                            <option value="Opuesto">Opuesto</option>
-                            <option value="Punta">Punta</option>
-                            <option value="Libero">Líbero</option>
+                            <option value="Quincenal">Quincenal</option>
+                            <option value="Mensual">Mensual</option>
                         </select>
                     </div>
-
                     <div>
                         <label for="salarioBase" class="block text-sm font-medium text-gray-700">Salario Base (USD)</label>
                         <input type="number" id="salarioBase" step="0.01" value="0.00" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
                     </div>
+                    
                     <div>
                         <label for="ultimaFechaPago" class="block text-sm font-medium text-gray-700">Última Fecha de Pago</label>
                         <input type="date" id="ultimaFechaPago" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
@@ -129,6 +131,7 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cédula</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Atleta</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Edad</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Físico</th>
@@ -139,7 +142,7 @@
                     </tr>
                 </thead>
                 <tbody id="athletesTableBody" class="bg-white divide-y divide-gray-200">
-                    <tr><td colspan="7" class="text-center py-4 text-gray-400">Cargando atletas...</td></tr>
+                    <tr><td colspan="8" class="text-center py-4 text-gray-400">Cargando atletas...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -182,11 +185,11 @@
         
         
         // ====================================================================
-        // === 1. UTILIDADES Y CÁLCULOS (Requeridas para la tabla) =============
+        // === 1. UTILIDADES Y CÁLCULOS =======================================
         // ====================================================================
 
         function calculateIMC(peso, talla) {
-            if (!peso || !talla) return 'N/A';
+            if (!peso || !talla || talla === 0) return 'N/A';
             const imc = peso / (talla * talla);
             return imc.toFixed(2);
         }
@@ -213,16 +216,22 @@
         
         function getPaymentStatus(lastPaymentDate) {
             const result = { status: 'Pendiente', class: 'bg-red-100 text-red-800' };
-            if (lastPaymentDate === 'N/A') return result;
+            if (lastPaymentDate === 'N/A' || !lastPaymentDate) return result;
 
             const lastPayment = new Date(lastPaymentDate);
             const today = new Date();
-            const thirtyDaysAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 30);
+            // Calcular 30 días antes de hoy
+            const thirtyDaysAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
             
-            if (lastPayment >= thirtyDaysAgo) {
+            // Comparar solo la fecha, ignorando la hora
+            const lastPaymentDateOnly = new Date(lastPayment.toDateString());
+            const thirtyDaysAgoDateOnly = new Date(thirtyDaysAgo.toDateString());
+            
+            if (lastPaymentDateOnly >= thirtyDaysAgoDateOnly) {
                 result.status = 'Al día';
                 result.class = 'bg-green-100 text-green-800';
-            } else if (lastPayment < thirtyDaysAgo) {
+            } else {
                 result.status = 'Atrasado';
                 result.class = 'bg-yellow-100 text-yellow-800';
             }
@@ -234,9 +243,6 @@
         // === 2. GESTIÓN DE LA TABLA (Lectura en tiempo real) =================
         // ====================================================================
 
-        /**
-         * Inicializa la escucha en tiempo real de atletas filtrados por clubId.
-         */
         function loadAthletes() {
             if (!db || !userId) {
                 console.error("No se pudo iniciar la carga: DB o userId no disponibles.");
@@ -258,15 +264,12 @@
             });
         }
 
-        /**
-         * Renderiza los atletas en la tabla HTML, incluyendo los botones de Editar y Eliminar.
-         */
         function renderAthletesTable(athletes) {
             const tableBody = document.getElementById('athletesTableBody');
             tableBody.innerHTML = ''; 
 
             if (athletes.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500">No hay atletas registrados para este club. ¡Regista uno nuevo!</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-gray-500">No hay atletas registrados para este club. ¡Regista uno nuevo!</td></tr>';
                 return;
             }
 
@@ -289,6 +292,7 @@
                 // Creación de la fila de la tabla
                 const row = `
                     <tr class="hover:bg-gray-100">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${athlete.cedulaIdentidad || 'N/A'}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${athlete.nombre} ${athlete.apellido}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${age} años</td>
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -319,9 +323,6 @@
         // === 3. FUNCIONES CRUD: GUARDAR / EDITAR / ELIMINAR =================
         // ====================================================================
 
-        /**
-         * Guarda un nuevo atleta o actualiza uno existente.
-         */
         window.saveAthlete = async function(event) {
             event.preventDefault();
 
@@ -332,43 +333,45 @@
 
             const athleteId = document.getElementById('athleteId').value;
             const isEditing = !!athleteId;
+            
+            // Validar que la Cédula sea numérica
+            const cedulaValue = document.getElementById('cedulaIdentidad').value.trim();
+            if (!/^\d+$/.test(cedulaValue)) {
+                alert("El campo Cédula de Identidad solo debe contener números.");
+                return;
+            }
 
             // Recolección de datos
             const athleteData = {
-                clubId: userId, // CRUCIAL para las reglas de seguridad
+                clubId: userId, 
+                cedulaIdentidad: cedulaValue, // Guardamos como string
                 nombre: document.getElementById('nombre').value.trim(),
                 apellido: document.getElementById('apellido').value.trim(),
                 fechaNacimiento: document.getElementById('fechaNacimiento').value,
                 talla: parseFloat(document.getElementById('talla').value),
                 peso: parseFloat(document.getElementById('peso').value),
-                posicion: document.getElementById('posicion').value,
+                tipoNomina: document.getElementById('tipoNomina').value, // Nuevo campo
                 salarioBase: parseFloat(document.getElementById('salarioBase').value || 0),
                 ultimaFechaPago: document.getElementById('ultimaFechaPago').value,
                 montoPago: parseFloat(document.getElementById('montoPago').value || 0),
-                // Asegúrate de que los campos numéricos se guarden como números
             };
 
             try {
                 if (isEditing) {
-                    // Actualizar documento
                     const athleteDocRef = doc(db, ATHLETES_COLLECTION_NAME, athleteId);
                     await updateDoc(athleteDocRef, athleteData);
                     alert("Atleta actualizado con éxito.");
                 } else {
-                    // Crear nuevo documento
                     await addDoc(collection(db, ATHLETES_COLLECTION_NAME), athleteData);
                     alert("Atleta registrado con éxito.");
                 }
-                resetForm(); // Limpiar formulario después de la operación
+                resetForm(); 
             } catch (error) {
                 console.error("Error al guardar/actualizar el atleta en Firestore:", error);
-                alert(`Error al guardar datos. Revisa las Reglas de Seguridad. Error: ${error.message}`);
+                alert(`Error al guardar datos. Revise las Reglas de Seguridad. Error: ${error.message}`);
             }
         }
 
-        /**
-         * Carga los datos de un atleta al formulario para su edición.
-         */
         window.editAthlete = async function(docId, event) {
             event.preventDefault();
             try {
@@ -380,12 +383,13 @@
                     
                     // Llenar el formulario con los datos
                     document.getElementById('athleteId').value = docId;
+                    document.getElementById('cedulaIdentidad').value = data.cedulaIdentidad || ''; // Nuevo campo
                     document.getElementById('nombre').value = data.nombre;
                     document.getElementById('apellido').value = data.apellido;
                     document.getElementById('fechaNacimiento').value = data.fechaNacimiento;
                     document.getElementById('talla').value = data.talla;
                     document.getElementById('peso').value = data.peso;
-                    document.getElementById('posicion').value = data.posicion;
+                    document.getElementById('tipoNomina').value = data.tipoNomina; // Nuevo campo
                     document.getElementById('salarioBase').value = data.salarioBase;
                     document.getElementById('ultimaFechaPago').value = data.ultimaFechaPago;
                     document.getElementById('montoPago').value = data.montoPago;
@@ -404,9 +408,6 @@
             }
         }
 
-        /**
-         * ELIMINA UN ATLETA DE FIRESTORE (NUEVA FUNCIÓN).
-         */
         window.deleteAthlete = async function(docId, athleteName, event) {
             event.preventDefault();
 
@@ -421,19 +422,15 @@
                 try {
                     const athleteDocRef = doc(db, ATHLETES_COLLECTION_NAME, docId);
                     await deleteDoc(athleteDocRef);
-                    // onSnapshot se encarga de la actualización de la tabla
                     console.log(`Atleta "${athleteName}" eliminado con éxito.`);
 
                 } catch (error) {
                     console.error("Error al eliminar el atleta:", error);
-                    alert(`Error al eliminar al atleta. Revisa las Reglas de Seguridad. Error: ${error.message}`);
+                    alert(`Error al eliminar al atleta. Revise las Reglas de Seguridad. Error: ${error.message}`);
                 }
             }
         }
 
-        /**
-         * Restablece el formulario a su estado inicial de registro.
-         */
         window.resetForm = function() {
             athleteForm.reset();
             document.getElementById('athleteId').value = '';
@@ -449,8 +446,7 @@
         
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Usuario logueado
-                userId = user.uid; // Asignar el UID del usuario
+                userId = user.uid; 
                 
                 // Mostrar nombre del club
                 let clubName = localStorage.getItem('currentClub') || 'Club';
@@ -463,7 +459,7 @@
                 // Iniciar la carga de atletas
                 loadAthletes();
             } else {
-                // Usuario no logueado, redirigir
+                // Redirigir si no hay sesión
                 console.log("Sesión no encontrada. Redirigiendo a index.html");
                 window.location.href = 'index.html'; 
             }
