@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menú Principal Control Voley</title>
+    <title>Menú Principal LVMEL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <script>
@@ -65,7 +65,6 @@
                 
                 <div class="flex items-center">
                     <span class="text-sm sm:text-lg font-medium text-white/90 mr-3">Club Activo:</span>
-                    <!-- Utilizamos el ID de almacenamiento consistente -->
                     <span id="currentClubDisplay" class="text-base sm:text-xl font-bold text-voley-light py-1 px-3 bg-voley-blue rounded-full shadow-md">Cargando...</span>
                 </div>
 
@@ -92,7 +91,7 @@
 
                 <div class="bg-white p-6 sm:p-8 rounded-lg shadow-xl mb-12 transform transition duration-500 hover:scale-[1.02]">
                      <p class="text-lg text-gray-700 leading-relaxed">
-                     Control Voley te permite gestionar todos los aspectos cruciales de tu club: *Datos de Atletas*, *Administración de pagos y vencimientos*, *Llevar estadísticas de juego*, y el seguimiento de *Cumpleaños* de cada atleta.
+                    Control Voley te permite gestionar todos los aspectos cruciales de tu club: *Datos de Atletas*, *Administración de pagos y vencimientos*, *Llevar estadísticas de juego*, y el seguimiento de *Cumpleaños* de cada atleta.
                 </p>
                 </div>
 
@@ -137,30 +136,23 @@
     </footer>
 
     <script>
-        // Clave de almacenamiento consistente utilizada en toda la aplicación
-        const CLUB_ID_STORAGE_KEY = 'lvm_club_id'; 
-        
-        // Elementos de UI
+        // Lógica de Sesión
+        const currentClubId = localStorage.getItem('currentClub');
         const currentClubDisplay = document.getElementById('currentClubDisplay');
         const logoutButton = document.getElementById('logoutButton');
-        
-        // Obtener el ID del club usando la clave consistente
-        const currentClubId = localStorage.getItem(CLUB_ID_STORAGE_KEY);
 
         /**
          * 1. Verificar sesión y mostrar el nombre del club.
          */
         if (currentClubId && currentClubId !== 'null') {
             currentClubDisplay.textContent = currentClubId;
-            // Guardamos el club en el localStorage para que lo usen las demás páginas
-            localStorage.setItem(CLUB_ID_STORAGE_KEY, currentClubId);
         } else {
             currentClubDisplay.textContent = 'Acceso Denegado';
             console.warn('No se encontró club en localStorage. Redirigiendo a login.');
             // Redirigir si no hay club para evitar acceso no autorizado
             setTimeout(() => {
-                 // FIX: Se cambió 'index.html' por './index.html' para una resolución de URL más robusta
-                 window.location.href = './index.html'; 
+                 // Asumiendo que tu página de login es index.html
+                 window.location.href = 'index.html'; 
             }, 500);
         }
 
@@ -169,10 +161,10 @@
          */
         logoutButton.addEventListener('click', () => {
             // Limpiar el ID del club del almacenamiento local
-            localStorage.removeItem(CLUB_ID_STORAGE_KEY); 
+            localStorage.removeItem('currentClub'); 
             
-            // FIX: Se cambió 'index.html' por './index.html' para una resolución de URL más robusta
-            window.location.href = './index.html'; 
+            // Redirigir a la página de login (index.html)
+            window.location.href = 'index.html'; 
         });
 
         /**
