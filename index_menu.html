@@ -7,23 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-
     <script>
-        // CONFIGURACIÓN Y INICIALIZACIÓN DE FIREBASE
-        const firebaseConfig = {
-            apiKey: "AIzaSyB5RB7mm1j-0gjCNTUEJTkyEqLjyZ3C7ws",
-            authDomain: "datacontrolvoley-ff556.firebaseapp.com",
-            projectId: "datacontrolvoley-ff556",
-            storageBucket: "datacontrolvoley-ff556.firebasestorage.app",
-            messagingSenderId: "516409072606",
-            appId: "1:516409072606:web:132538dba358a076d71b4f"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth(); 
-        
-        // CONFIGURACIÓN TAILWIND (Consistencia de Colores)
+        // CONFIGURACIÓN TAILWIND (Mantenida)
         tailwind.config = {
             theme: {
                 extend: {
@@ -40,7 +25,7 @@
         }
     </script>
     <style>
-        /* Estilos de Fondo y Degradado */
+        /* Estilos de Fondo y Degradado (Mantenidos) */
         .hero-section {
             background-image: url('https://placehold.co/1920x1080/0e1b3e/ffffff?text=Voleibol');
             background-size: cover;
@@ -60,7 +45,7 @@
             z-index: -1;
         }
 
-        /* Animación para los botones */
+        /* Animación para los botones (Mantenida) */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -150,19 +135,29 @@
         </p>
     </footer>
 
-    <script>
+    <script type="module">
+        // IMPORTACIONES MODERNAS
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { firebaseConfig } from './firebase-config.js'; 
+
+        // INICIALIZACIÓN
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app); 
+
         const currentClubDisplay = document.getElementById('currentClubDisplay');
         const logoutButton = document.getElementById('logoutButton');
 
         /**
-         * 1. Verificar sesión con Firebase (Si no hay sesión, redirige al Login).
+         * 1. Verificar sesión con Firebase (onAuthStateChanged V11+).
          */
-        auth.onAuthStateChanged((user) => {
+        onAuthStateChanged(auth, (user) => {
             if (user) {
                 // USUARIO AUTENTICADO
                 let clubName = localStorage.getItem('currentClub');
                 
                 if (!clubName || clubName === 'null') {
+                    // Si no está en localStorage, lo reconstruye del email
                     clubName = user.email.split('@')[0].charAt(0).toUpperCase() + user.email.split('@')[0].slice(1);
                     localStorage.setItem('currentClub', clubName);
                 }
@@ -172,26 +167,27 @@
             } else {
                 // NO HAY USUARIO AUTENTICADO
                 currentClubDisplay.textContent = 'Acceso Denegado';
+                console.warn("Sesión no encontrada. Redirigiendo a index.html");
                 window.location.href = 'index.html'; 
             }
         });
 
         /**
-         * 2. Función para cerrar sesión.
+         * 2. Función para cerrar sesión (signOut V11+).
          */
         logoutButton.addEventListener('click', () => {
-            auth.signOut().then(() => {
+            signOut(auth).then(() => { // Usando signOut(auth) moderno
                 localStorage.removeItem('currentClub'); 
                 window.location.href = 'index.html'; 
             }).catch((error) => {
-                console.error('Error al cerrar sesión, pero se redirige:', error);
+                console.error('Error al cerrar sesión, se redirige:', error);
                 localStorage.removeItem('currentClub');
                 window.location.href = 'index.html';
             });
         });
 
         /**
-         * 3. Bloquear el clic derecho.
+         * 3. Bloquear el clic derecho (Mantenido).
          */
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
