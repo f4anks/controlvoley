@@ -3,174 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Nómina LVMEL - Nómina de Atletas</title>
+    <title>Gestión de Atletas - LVMEL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    
     <style>
         /* Estilos personalizados del tema Azul Marino/Eléctrico */
         :root {
             --color-azul-marino: #001F3F;    /* Azul Marino */
             --color-azul-electrico: #0074D9; /* Azul Eléctrico */
+            --color-fondo-claro: #f0f8ff;    /* Azure/Azul muy pálido */
         }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8f8f8;
+            background-color: var(--color-fondo-claro); /* Fondo Azul Pálido */
         }
         .azul-marino-bg { background-color: var(--color-azul-marino); }
         .azul-marino-hover:hover { background-color: #001a33; }
         .azul-electrico-text { color: var(--color-azul-electrico); }
-        .azul-electrico-border { border-color: var(--color-azul-electrico); }
         .rounded-xl { border-radius: 0.75rem; }
-        .shadow-lg-azul { box-shadow: 0 10px 15px -3px rgba(0, 31, 63, 0.2), 0 4px 6px -2px rgba(0, 31, 63, 0.1); }
-        input[type="number"]::-webkit-inner-spin-button, 
-        input[type="number"]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
+        .shadow-lg-azul { box-shadow: 0 0 20px -5px rgba(0, 31, 63, 0.4); }
+        
+        /* Estilo para el BANNER (Usando la imagen de fondo con 250px) */
+        .banner-header {
+            background-image: url('img/banner.png'); 
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat;
+            min-height: 250px; /* Altura 250px */
+            width: 100%;
+        }
+        /* Estilos específicos para la tabla y formularios */
+        .form-container {
+            border: 1px solid #ccc;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
-
-    <div id="app-screen" class="flex-grow p-4 md:p-8 flex flex-col">
+<body>
+    
+    <div class="banner-header"></div>
+    <div class="container mx-auto p-4 md:p-8">
         
-        <header class="mb-6 border-b pb-4">
-            <div class="flex justify-between items-center mb-4">
-                <a href="index_menu.html" class="py-2 px-4 azul-marino-bg text-white font-semibold rounded-lg azul-marino-hover transition duration-200 shadow-md flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-center border-b pb-4">
+            <div class="flex items-center space-x-4">
+                <a href="index_menu.html" class="text-gray-600 hover:text-azul-electrico transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
                     </svg>
-                    Regresar al Menú
                 </a>
-                
-                <div class="flex flex-col md:flex-row justify-end items-end md:items-center">
-                    <h1 class="text-3xl font-extrabold text-gray-800 text-right">Gestión de Nómina y Atletas</h1>
-                    <div class="flex items-center mt-2 md:mt-0 ml-4">
-                        <span class="text-lg font-medium text-gray-600 mr-2">Club Activo:</span>
-                        <span id="currentClubDisplay" class="text-lg font-bold azul-electrico-text py-1 px-3 bg-blue-50 rounded-full border azul-electrico-border"></span>
-                    </div>
-                </div>
+                <h1 class="text-3xl font-extrabold text-gray-900">
+                    Gestión de Atletas (<span id="clubNameDisplay" class="azul-electrico-text">Cargando...</span>)
+                </h1>
             </div>
-            
-            <p class="text-xs text-gray-400 mt-2">
-                Estado de Auth: <span id="authStatus">Inicializando...</span> | 
-                <span title="ID de usuario, crucial para las reglas de seguridad de Firestore">UserID: <span id="currentUserId">N/A</span></span>
-            </p>
+            <button onclick="logout()" class="mt-4 md:mt-0 py-2 px-4 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-200 shadow-md">
+                Cerrar Sesión
+            </button>
         </header>
 
-
-        <div id="data-table-view" class="main-view flex-grow">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-gray-800">Atletas Registrados (<span id="athleteCount">0</span>)</h2>
-                <button onclick="navigateTo('form')" class="py-2 px-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-200 shadow-md">
-                    + Registrar Nuevo Atleta
-                </button>
-            </div>
-            
-            <div class="bg-white p-4 rounded-xl shadow-lg-azul overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Edad</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Físico (IMC)</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Salario</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Últ. Pago</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="athletesTableBody" class="bg-white divide-y divide-gray-200">
-                        </tbody>
-                </table>
-            </div>
-            <p id="loadingMessage" class="mt-4 text-center text-gray-500">Cargando datos...</p>
-            <p id="firestoreErrorMessage" class="mt-2 text-center text-red-600 font-semibold hidden">
-                </p>
-        </div>
-
-        <div id="form-edit-view" class="main-view hidden">
-            <div class="mb-6 flex justify-end">
-                <button onclick="navigateTo('table')" class="py-2 px-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-200 shadow-md">
-                    <span class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        Regresar a la Consulta
-                    </span>
-                </button>
-            </div>
-
-            <section class="bg-white p-6 rounded-xl shadow-lg-azul w-full max-w-2xl mx-auto">
-                <h2 class="text-xl font-bold mb-4 border-b pb-2 azul-electrico-text" id="formTitle">Registro de Nuevo Atleta</h2>
-                <form id="athleteForm" onsubmit="saveAthlete(event)">
-                    <input type="hidden" id="athleteDocId">
-
-                    <h3 class="font-semibold mt-4 mb-2 azul-marino-bg text-white p-2 rounded-md">1. Datos del Atleta</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" id="nombre" placeholder="Nombre" required class="p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico">
-                        <input type="text" id="apellido" placeholder="Apellido" required class="p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico">
-                        <div>
-                            <label class="block text-xs text-gray-500 mb-1">Fecha de Nacimiento</label>
-                            <input type="date" id="fechaNacimiento" required class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico">
-                        </div>
-                        <input type="tel" id="telefono" placeholder="Teléfono" class="p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico">
+        <div id="athleteFormContainer" class="bg-white p-6 rounded-xl shadow-lg-azul form-container mb-8">
+            <h2 id="formTitle" class="text-2xl font-bold mb-4 azul-electrico-text">Registrar Nuevo Atleta</h2>
+            <form id="athleteForm" onsubmit="saveAthlete(event)">
+                <input type="hidden" id="athleteId">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
+                        <input type="text" id="nombre" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
                     </div>
-
-                    <h3 class="font-semibold mt-6 mb-2 azul-marino-bg text-white p-2 rounded-md">2. Datos Físicos</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="relative">
-                            <input type="number" id="peso" placeholder="Peso" step="0.1" required class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico pr-10">
-                            <span class="absolute right-0 top-0 mt-2 mr-3 text-gray-500">kg</span>
-                        </div>
-                        <div class="relative">
-                            <input type="number" id="talla" placeholder="Talla" step="0.01" required class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico pr-10">
-                            <span class="absolute right-0 top-0 mt-2 mr-3 text-gray-500">m</span>
-                        </div>
+                    <div>
+                        <label for="apellido" class="block text-sm font-medium text-gray-700">Apellido</label>
+                        <input type="text" id="apellido" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
                     </div>
-
-                    <h3 class="font-semibold mt-6 mb-2 azul-marino-bg text-white p-2 rounded-md">3. Datos de Nómina</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="relative">
-                            <input type="number" id="montoPago" placeholder="Monto del Pago (USD)" required min="0" step="0.01" class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico pr-10">
-                            <span class="absolute right-0 top-0 mt-2 mr-3 text-gray-500">$</span>
-                        </div>
-                        <select id="frecuenciaPago" required class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico">
-                            <option value="" disabled selected>Frecuencia de Pago</option>
-                            <option value="mensual">Mensual</option>
-                            <option value="quincenal">Quincenal</option>
-                            <option value="semanal">Semanal</option>
-                        </select>
-                        <div>
-                             <label class="block text-xs text-gray-500 mb-1">Última Fecha de Pago Registrada</label>
-                            <input type="date" id="ultimaFechaPago" class="w-full p-2 border rounded-lg focus:ring-azul-electrico focus:border-azul-electrico">
-                        </div>
+                    <div>
+                        <label for="fechaNacimiento" class="block text-sm font-medium text-gray-700">Fecha de Nacimiento</label>
+                        <input type="date" id="fechaNacimiento" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
                     </div>
                     
-                    <p id="connectionStatus" class="mt-4 text-sm text-center font-medium text-yellow-600">
-                        Conectando con el servidor...
-                    </p>
+                    <div>
+                        <label for="talla" class="block text-sm font-medium text-gray-700">Talla (m)</label>
+                        <input type="number" id="talla" step="0.01" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="peso" class="block text-sm font-medium text-gray-700">Peso (kg)</label>
+                        <input type="number" id="peso" step="0.1" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="posicion" class="block text-sm font-medium text-gray-700">Posición</label>
+                        <select id="posicion" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                            <option value="">Seleccione...</option>
+                            <option value="Armador">Armador</option>
+                            <option value="Central">Central</option>
+                            <option value="Opuesto">Opuesto</option>
+                            <option value="Punta">Punta</option>
+                            <option value="Libero">Líbero</option>
+                        </select>
+                    </div>
 
-                    <button type="submit" id="saveButton" class="w-full mt-3 py-3 azul-marino-bg text-white font-semibold rounded-lg azul-marino-hover transition duration-200" disabled>
-                        Guardar Atleta y Nómina
+                    <div>
+                        <label for="salarioBase" class="block text-sm font-medium text-gray-700">Salario Base (USD)</label>
+                        <input type="number" id="salarioBase" step="0.01" value="0.00" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="ultimaFechaPago" class="block text-sm font-medium text-gray-700">Última Fecha de Pago</label>
+                        <input type="date" id="ultimaFechaPago" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="montoPago" class="block text-sm font-medium text-gray-700">Monto Último Pago (USD)</label>
+                        <input type="number" id="montoPago" step="0.01" value="0.00" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2">
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end space-x-4">
+                    <button type="button" id="cancelButton" onclick="resetForm()" class="hidden py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+                        Cancelar
                     </button>
-                    <div id="saveMessage" class="text-center mt-3 text-sm hidden"></div>
-                </form>
-            </section>
+                    <button type="submit" id="submitButton" class="py-2 px-4 azul-marino-bg text-white font-semibold rounded-lg hover:bg-azul-electrico transition duration-200 shadow-md">
+                        Guardar Atleta
+                    </button>
+                </div>
+            </form>
         </div>
-        
+
+        <div class="bg-white p-6 rounded-xl shadow-lg-azul overflow-x-auto">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Nómina de Atletas Registrados</h2>
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Atleta</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Edad</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Físico</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Salario</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Últ. Pago</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado Pago</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="athletesTableBody" class="bg-white divide-y divide-gray-200">
+                    <tr><td colspan="7" class="text-center py-4 text-gray-400">Cargando atletas...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
     <script type="module">
-        // Importaciones de Firebase SDK (v11.6.1)
+        // --- CONSTANTES ---
+        const ATHLETES_COLLECTION_NAME = 'club_athletes';
+
+        // --- Importaciones de Firebase ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, addDoc, onSnapshot, collection, query, where, getDoc, updateDoc, setLogLevel, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Establecer nivel de log para depuración de Firestore
-        setLogLevel('Debug');
-
-        // --- Configuración de Firebase y Variables Globales ---
-        // **IMPORTANTE:** Esta configuración debe coincidir con tu proyecto de Firebase.
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, collection, doc, onSnapshot, query, where, 
+            addDoc, updateDoc, deleteDoc, getDoc 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"; 
+        
+        // --- Configuración de Firebase ---
         const firebaseConfig = { 
             apiKey: "AIzaSyB5RB7mm1j-0gjCNTUEJTkyEqLjyZ3C7ws",
             authDomain: "datacontrolvoley-ff556.firebaseapp.com",
@@ -179,322 +167,99 @@
             messagingSenderId: "516409072606",
             appId: "1:516409072606:web:132538dba358a077d71b4f" 
         };
-        
-        // **CONSTANTE CRÍTICA: RUTA DE COLECCIÓN SIMPLIFICADA**
-        const ATHLETES_COLLECTION_NAME = 'club_athletes';
 
-        let app, db, auth;
-        let userId = null; // UID del usuario autenticado (se usará como clubId para filtrar)
-        let clubName = localStorage.getItem('currentClub') || 'Club Principal'; // Nombre del club (solo para mostrar)
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        let isAuthReady = false; 
-        let isSaving = false; 
-
-        // Elementos de UI
-        const saveButton = document.getElementById('saveButton');
-        const connectionStatusElement = document.getElementById('connectionStatus');
-        const currentClubDisplay = document.getElementById('currentClubDisplay');
-        const authStatusElement = document.getElementById('authStatus');
-        const userIdElement = document.getElementById('currentUserId');
+        // --- Variables de Estado ---
+        let userId = null;
+        const clubNameDisplay = document.getElementById('clubNameDisplay');
+        const athleteForm = document.getElementById('athleteForm');
         const formTitle = document.getElementById('formTitle');
-        const athleteDocIdInput = document.getElementById('athleteDocId');
-
-
-        // Inicializar la visualización del club
-        currentClubDisplay.textContent = clubName;
-
-        // --- Funciones de Utilidad y Navegación ---
+        const submitButton = document.getElementById('submitButton');
+        const cancelButton = document.getElementById('cancelButton');
         
-        /**
-         * Navega entre las vistas principales: 'table' (tabla de atletas) o 'form' (formulario de registro/edición).
-         */
-        window.navigateTo = function(viewName) {
-            document.querySelectorAll('.main-view').forEach(el => el.classList.add('hidden'));
+        
+        // ====================================================================
+        // === 1. UTILIDADES Y CÁLCULOS (Requeridas para la tabla) =============
+        // ====================================================================
 
-            if (viewName === 'table') {
-                document.getElementById('data-table-view').classList.remove('hidden');
-                // Al volver a la tabla, aseguramos que los datos estén cargados
-                if (userId && isAuthReady) { 
-                    loadAthletes(); 
-                }
-            } else if (viewName === 'form') {
-                document.getElementById('form-edit-view').classList.remove('hidden');
-                document.getElementById('athleteForm').reset(); // Limpiar formulario
-                athleteDocIdInput.value = ''; // Resetear ID de documento
-                formTitle.textContent = 'Registro de Nuevo Atleta'; // Restablecer título
-                document.getElementById('saveMessage').classList.add('hidden'); 
-            }
+        function calculateIMC(peso, talla) {
+            if (!peso || !talla) return 'N/A';
+            const imc = peso / (talla * talla);
+            return imc.toFixed(2);
         }
-        
-        // Funciones de Cálculo (Edad, IMC, Status de Pago)
+
+        function getIMCStatus(imc) {
+            if (imc === 'N/A' || isNaN(imc)) return 'bg-gray-200 text-gray-800';
+            if (imc < 18.5) return 'bg-yellow-100 text-yellow-800'; // Bajo peso
+            if (imc >= 18.5 && imc <= 24.9) return 'bg-green-100 text-green-800'; // Normal
+            if (imc >= 25 && imc <= 29.9) return 'bg-orange-100 text-orange-800'; // Sobrepeso
+            return 'bg-red-100 text-red-800'; // Obesidad
+        }
+
         function calculateAge(dateOfBirth) {
-            const dob = new Date(dateOfBirth);
+            if (!dateOfBirth) return 'N/A';
+            const birthDate = new Date(dateOfBirth);
             const today = new Date();
-            let age = today.getFullYear() - dob.getFullYear();
-            const monthDifference = today.getMonth() - dob.getMonth();
-            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dob.getDate())) {
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDifference = today.getMonth() - birthDate.getMonth();
+            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
                 age--;
             }
             return age;
         }
+        
+        function getPaymentStatus(lastPaymentDate) {
+            const result = { status: 'Pendiente', class: 'bg-red-100 text-red-800' };
+            if (lastPaymentDate === 'N/A') return result;
 
-        function calculateIMC(peso, talla) {
-            if (talla > 0) {
-                const imc = peso / (talla * talla);
-                return imc.toFixed(2);
-            }
-            return 'N/A';
-        }
-
-        function getIMCStatus(imc) {
-            const imcValue = parseFloat(imc);
-            if (isNaN(imcValue)) return 'bg-gray-200 text-gray-800';
-            
-            if (imcValue < 18.5) return 'bg-blue-200 text-blue-800'; 
-            if (imcValue >= 18.5 && imcValue < 25) return 'bg-green-200 text-green-800'; 
-            if (imcValue >= 25 && imcValue < 30) return 'bg-yellow-200 text-yellow-800'; 
-            return 'bg-red-200 text-red-800'; 
-        }
-
-        function getPaymentStatus(lastPaymentDateStr) {
-            if (!lastPaymentDateStr || lastPaymentDateStr === 'N/A') {
-                return { status: 'Pendiente', class: 'bg-gray-400 text-white' };
-            }
-
-            const lastPayment = new Date(lastPaymentDateStr);
+            const lastPayment = new Date(lastPaymentDate);
             const today = new Date();
+            const thirtyDaysAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 30);
             
-            lastPayment.setHours(0, 0, 0, 0);
-            today.setHours(0, 0, 0, 0);
-
-            const diffTime = today.getTime() - lastPayment.getTime();
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
-
-            let status = '';
-            let statusClass = '';
-
-            if (diffDays > 30) {
-                status = 'Vencido';
-                statusClass = 'bg-red-500 text-white font-bold';
-            } else if (diffDays >= 23 && diffDays <= 30) {
-                status = 'Por Vencer';
-                statusClass = 'bg-yellow-400 text-gray-900 font-bold';
-            } else if (diffDays >= 0) {
-                status = 'Solvente';
-                statusClass = 'bg-green-500 text-white font-bold';
-            } else {
-                status = 'Futuro'; 
-                statusClass = 'bg-blue-500 text-white';
+            if (lastPayment >= thirtyDaysAgo) {
+                result.status = 'Al día';
+                result.class = 'bg-green-100 text-green-800';
+            } else if (lastPayment < thirtyDaysAgo) {
+                result.status = 'Atrasado';
+                result.class = 'bg-yellow-100 text-yellow-800';
             }
-
-            return { status, class: statusClass };
-        }
-        
-        
-        /**
-         * Actualiza el estado del botón Guardar y el mensaje de conexión.
-         */
-        function updateSaveButtonState() {
-            const clubIDToFilter = userId; 
-
-            if (!clubIDToFilter) { 
-                saveButton.disabled = true;
-                connectionStatusElement.textContent = 'ERROR: No autenticado. Inicie sesión.';
-                connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-red-600';
-            } else if (!isAuthReady) {
-                saveButton.disabled = true;
-                connectionStatusElement.textContent = 'Conectando con el servidor...';
-                connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-yellow-600';
-            } else if (isAuthReady && db && clubIDToFilter) {
-                saveButton.disabled = false;
-                connectionStatusElement.textContent = `¡Conexión lista! Club: ${clubName}.`;
-                connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-green-600';
-            } else {
-                saveButton.disabled = true;
-                connectionStatusElement.textContent = 'ERROR: Autenticación fallida.';
-                connectionStatusElement.className = 'mt-4 text-sm text-center font-medium text-red-600';
-            }
+            return result;
         }
 
 
-        // --- Inicialización y Autenticación de Firebase ---
-
-        function setupFirebase() {
-            updateSaveButtonState(); 
-
-            try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                // Configurar el listener de estado para tomar el UID
-                onAuthStateChanged(auth, (user) => {
-                    isAuthReady = true;
-                    if (user) {
-                        userId = user.uid; // Usamos el UID real del usuario logeado
-                        authStatusElement.textContent = 'Autenticado';
-                        userIdElement.textContent = userId;
-                        
-                        // Actualizar clubName y display si es necesario
-                        if (clubName === 'Club Principal' || clubName === localStorage.getItem('currentClub') || !clubName) {
-                            clubName = user.email ? user.email.split('@')[0].charAt(0).toUpperCase() + user.email.split('@')[0].slice(1) : 'Club Logueado';
-                            localStorage.setItem('currentClub', clubName);
-                            currentClubDisplay.textContent = clubName;
-                        }
-                        
-                        console.log("Firebase Auth listo. UserID/ClubID:", userId);
-                        
-                    } else {
-                        // Si no hay usuario logueado, redirigir al login
-                        userId = null;
-                        authStatusElement.textContent = 'Desconectado (Redirigiendo...)';
-                        console.log("Sesión no encontrada. Redirigiendo a index.html");
-                        setTimeout(() => {
-                             window.location.href = 'index.html'; // Asegúrate que esta es tu página de login
-                        }, 500);
-                        
-                    }
-                    
-                    updateSaveButtonState(); 
-                    
-                    // Cargar datos tan pronto como la auth esté lista Y HAYA UN USUARIO
-                    if (userId) {
-                        navigateTo('table'); 
-                    }
-                });
-
-            } catch (error) {
-                console.error("Error CRÍTICO al inicializar Firebase:", error);
-                authStatusElement.textContent = 'ERROR Crítico';
-                document.getElementById('loadingMessage').textContent = `Error CRÍTICO de Firebase: ${error.code || error.message}. Revise la consola.`;
-                isAuthReady = true;
-                userId = null; 
-                updateSaveButtonState();
-            }
-        }
-        setupFirebase();
-
-        // --- Funciones de Datos (Firestore) ---
+        // ====================================================================
+        // === 2. GESTIÓN DE LA TABLA (Lectura en tiempo real) =================
+        // ====================================================================
 
         /**
-         * Guarda un nuevo atleta o actualiza uno existente.
+         * Inicializa la escucha en tiempo real de atletas filtrados por clubId.
          */
-        window.saveAthlete = async function(event) {
-            event.preventDefault();
-            
-            if (isSaving || saveButton.disabled || !userId || !db) {
-                document.getElementById('saveMessage').textContent = connectionStatusElement.textContent;
-                document.getElementById('saveMessage').classList.remove('hidden');
-                document.getElementById('saveMessage').style.color = 'red';
+        function loadAthletes() {
+            if (!db || !userId) {
+                console.error("No se pudo iniciar la carga: DB o userId no disponibles.");
                 return;
             }
 
-            const athleteDocId = athleteDocIdInput.value;
-            const saveMessage = document.getElementById('saveMessage');
-            
-            saveMessage.classList.add('hidden');
-            saveButton.disabled = true; 
-            saveButton.textContent = athleteDocId ? 'Actualizando...' : 'Guardando...';
-            isSaving = true;
+            const q = query(collection(db, ATHLETES_COLLECTION_NAME), where("clubId", "==", userId));
 
-            try {
-                const athleteData = {
-                    clubId: userId, // UID del club autenticado
-                    nombre: document.getElementById('nombre').value.trim(),
-                    apellido: document.getElementById('apellido').value.trim(),
-                    fechaNacimiento: document.getElementById('fechaNacimiento').value,
-                    telefono: document.getElementById('telefono').value.trim(),
-                    peso: parseFloat(document.getElementById('peso').value),
-                    talla: parseFloat(document.getElementById('talla').value),
-                    montoPago: parseFloat(document.getElementById('montoPago').value), 
-                    frecuenciaPago: document.getElementById('frecuenciaPago').value,
-                    ultimaFechaPago: document.getElementById('ultimaFechaPago').value || 'N/A',
-                    // Campos de control
-                    userId: userId, 
-                    // createdAt solo se añade en el primer registro
-                };
-
-                if (athleteDocId) {
-                    // MODO EDICIÓN: Actualizar el documento existente
-                    const docRef = doc(db, ATHLETES_COLLECTION_NAME, athleteDocId);
-                    await updateDoc(docRef, athleteData);
-                    saveMessage.textContent = `Atleta ${athleteData.nombre} actualizado con éxito. Regresando a la tabla...`;
-                } else {
-                    // MODO REGISTRO: Crear un nuevo documento
-                    athleteData.createdAt = serverTimestamp(); // Solo para nuevos registros
-                    await addDoc(collection(db, ATHLETES_COLLECTION_NAME), athleteData); 
-                    saveMessage.textContent = `Atleta ${athleteData.nombre} registrado con éxito. Regresando a la tabla...`;
-                }
-
-                saveMessage.classList.remove('hidden');
-                saveMessage.style.color = 'green';
-                
-                setTimeout(() => {
-                    navigateTo('table');
-                }, 1000); 
-
-            } catch (error) {
-                console.error("Error al guardar/actualizar el atleta en Firestore:", error);
-                saveMessage.textContent = `Error al guardar/actualizar: ${error.message}. Revise la consola.`;
-                saveMessage.classList.remove('hidden');
-                saveMessage.style.color = 'red';
-            } finally {
-                saveButton.textContent = 'Guardar Atleta y Nómina';
-                isSaving = false;
-                updateSaveButtonState(); 
-            }
-        }
-        
-        /**
-         * Carga los atletas del club actual en tiempo real usando onSnapshot.
-         */
-        let unsubscribeAthletes = null; 
-
-        function loadAthletes() {
-            if (unsubscribeAthletes) {
-                unsubscribeAthletes();
-                unsubscribeAthletes = null;
-            }
-            
-            document.getElementById('firestoreErrorMessage').classList.add('hidden');
-            
-            if (!userId || !db) { 
-                 document.getElementById('loadingMessage').textContent = 'Error: No se puede cargar. Usuario no autenticado.';
-                 return;
-            }
-
-            document.getElementById('loadingMessage').textContent = `Cargando atletas de ${clubName}...`;
-            
-            const q = query(
-                collection(db, ATHLETES_COLLECTION_NAME), // Ruta simple
-                where('clubId', '==', userId) // Filtrar por el UID del club/usuario
-            );
-
-            // Listener en tiempo real
-            unsubscribeAthletes = onSnapshot(q, (snapshot) => {
+            // onSnapshot es crucial para la actualización en tiempo real
+            onSnapshot(q, (snapshot) => {
                 const athletes = [];
-                snapshot.forEach((doc) => {
+                snapshot.forEach(doc => {
                     athletes.push({ id: doc.id, ...doc.data() });
                 });
-                
-                athletes.sort((a, b) => a.nombre.localeCompare(b.nombre));
-
                 renderAthletesTable(athletes);
-                document.getElementById('athleteCount').textContent = athletes.length;
-                document.getElementById('loadingMessage').textContent = ''; 
-                document.getElementById('firestoreErrorMessage').classList.add('hidden');
-
             }, (error) => {
-                console.error("Error al escuchar cambios en Firestore:", error);
-                document.getElementById('loadingMessage').textContent = 'Fallo de carga en tiempo real.';
-                document.getElementById('firestoreErrorMessage').textContent = `ERROR DE FIRESTORE: ${error.message}. Verifica las reglas de seguridad.`;
-                document.getElementById('firestoreErrorMessage').classList.remove('hidden');
-                
+                console.error("Error al cargar atletas en tiempo real: ", error);
+                alert("Error al cargar datos. Verifique la conexión y las Reglas de Seguridad.");
             });
         }
-        
+
         /**
-         * Renderiza los atletas en la tabla HTML.
+         * Renderiza los atletas en la tabla HTML, incluyendo los botones de Editar y Eliminar.
          */
         function renderAthletesTable(athletes) {
             const tableBody = document.getElementById('athletesTableBody');
@@ -506,22 +271,22 @@
             }
 
             athletes.forEach(athlete => {
+                // Ejecutar cálculos de utilidad
                 const imc = calculateIMC(athlete.peso, athlete.talla);
                 const imcStatusClass = getIMCStatus(imc);
                 const age = calculateAge(athlete.fechaNacimiento);
                 
+                // Formateo de salario/pago
                 const paymentAmount = athlete.montoPago || athlete.salarioBase || 0; 
-                
                 const salaryFormatted = new Intl.NumberFormat('en-US', {
                     style: 'currency',
                     currency: 'USD',
                 }).format(paymentAmount);
-
-                const lastPayment = athlete.ultimaFechaPago || 'N/A';
                 
+                const lastPayment = athlete.ultimaFechaPago || 'N/A';
                 const paymentStatus = getPaymentStatus(lastPayment);
-
-
+                
+                // Creación de la fila de la tabla
                 const row = `
                     <tr class="hover:bg-gray-100">
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${athlete.nombre} ${athlete.apellido}</td>
@@ -534,67 +299,186 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">${salaryFormatted}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${lastPayment}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                             <span class="px-2 inline-flex text-xs leading-5 rounded-full ${paymentStatus.class}">
-                                 ${paymentStatus.status}
-                             </span>
+                                <span class="px-2 inline-flex text-xs leading-5 rounded-full ${paymentStatus.class}">
+                                    ${paymentStatus.status}
+                                </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="#" class="text-indigo-600 hover:text-indigo-900 transition" onclick="editAthlete('${athlete.id}', event)">Editar</a>
+                            <a href="#" class="text-indigo-600 hover:text-indigo-900 transition mr-4" onclick="editAthlete('${athlete.id}', event)">Editar</a>
+                            <a href="#" class="text-red-600 hover:text-red-900 transition" 
+                               onclick="deleteAthlete('${athlete.id}', '${athlete.nombre + ' ' + athlete.apellido}', event)">Eliminar</a>
                         </td>
                     </tr>
                 `;
                 tableBody.insertAdjacentHTML('beforeend', row);
             });
         }
-        
+
+
+        // ====================================================================
+        // === 3. FUNCIONES CRUD: GUARDAR / EDITAR / ELIMINAR =================
+        // ====================================================================
+
         /**
-         * Lógica para el botón de Edición.
-         * Requiere implementar la función getAthleteData y popular el formulario.
+         * Guarda un nuevo atleta o actualiza uno existente.
+         */
+        window.saveAthlete = async function(event) {
+            event.preventDefault();
+
+            if (!userId) {
+                alert("Error: Usuario no autenticado.");
+                return;
+            }
+
+            const athleteId = document.getElementById('athleteId').value;
+            const isEditing = !!athleteId;
+
+            // Recolección de datos
+            const athleteData = {
+                clubId: userId, // CRUCIAL para las reglas de seguridad
+                nombre: document.getElementById('nombre').value.trim(),
+                apellido: document.getElementById('apellido').value.trim(),
+                fechaNacimiento: document.getElementById('fechaNacimiento').value,
+                talla: parseFloat(document.getElementById('talla').value),
+                peso: parseFloat(document.getElementById('peso').value),
+                posicion: document.getElementById('posicion').value,
+                salarioBase: parseFloat(document.getElementById('salarioBase').value || 0),
+                ultimaFechaPago: document.getElementById('ultimaFechaPago').value,
+                montoPago: parseFloat(document.getElementById('montoPago').value || 0),
+                // Asegúrate de que los campos numéricos se guarden como números
+            };
+
+            try {
+                if (isEditing) {
+                    // Actualizar documento
+                    const athleteDocRef = doc(db, ATHLETES_COLLECTION_NAME, athleteId);
+                    await updateDoc(athleteDocRef, athleteData);
+                    alert("Atleta actualizado con éxito.");
+                } else {
+                    // Crear nuevo documento
+                    await addDoc(collection(db, ATHLETES_COLLECTION_NAME), athleteData);
+                    alert("Atleta registrado con éxito.");
+                }
+                resetForm(); // Limpiar formulario después de la operación
+            } catch (error) {
+                console.error("Error al guardar/actualizar el atleta en Firestore:", error);
+                alert(`Error al guardar datos. Revisa las Reglas de Seguridad. Error: ${error.message}`);
+            }
+        }
+
+        /**
+         * Carga los datos de un atleta al formulario para su edición.
          */
         window.editAthlete = async function(docId, event) {
             event.preventDefault();
-            
-            // 1. Navegar al formulario
-            navigateTo('form');
-            formTitle.textContent = 'Editar Atleta Existente';
-            saveButton.textContent = 'Actualizar Atleta';
-            athleteDocIdInput.value = docId; // Almacenar el ID del documento
-            
-            // 2. Obtener los datos (Lógica pendiente de implementación)
-            console.log("Cargando datos del atleta:", docId);
-            
             try {
-                const docRef = doc(db, ATHLETES_COLLECTION_NAME, docId);
-                const docSnap = await getDoc(docRef);
+                const athleteDocRef = doc(db, ATHLETES_COLLECTION_NAME, docId);
+                const docSnap = await getDoc(athleteDocRef);
 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     
-                    // 3. Rellenar el formulario
-                    document.getElementById('nombre').value = data.nombre || '';
-                    document.getElementById('apellido').value = data.apellido || '';
-                    document.getElementById('fechaNacimiento').value = data.fechaNacimiento || '';
-                    document.getElementById('telefono').value = data.telefono || '';
-                    document.getElementById('peso').value = data.peso || '';
-                    document.getElementById('talla').value = data.talla || '';
-                    document.getElementById('montoPago').value = data.montoPago || '';
-                    document.getElementById('frecuenciaPago').value = data.frecuenciaPago || '';
-                    document.getElementById('ultimaFechaPago').value = data.ultimaFechaPago && data.ultimaFechaPago !== 'N/A' ? data.ultimaFechaPago : '';
+                    // Llenar el formulario con los datos
+                    document.getElementById('athleteId').value = docId;
+                    document.getElementById('nombre').value = data.nombre;
+                    document.getElementById('apellido').value = data.apellido;
+                    document.getElementById('fechaNacimiento').value = data.fechaNacimiento;
+                    document.getElementById('talla').value = data.talla;
+                    document.getElementById('peso').value = data.peso;
+                    document.getElementById('posicion').value = data.posicion;
+                    document.getElementById('salarioBase').value = data.salarioBase;
+                    document.getElementById('ultimaFechaPago').value = data.ultimaFechaPago;
+                    document.getElementById('montoPago').value = data.montoPago;
                     
-                    document.getElementById('saveMessage').textContent = 'Datos listos para editar.';
-                    document.getElementById('saveMessage').classList.remove('hidden');
-                    document.getElementById('saveMessage').style.color = 'blue';
+                    // Ajustar UI a modo edición
+                    formTitle.textContent = "Editar Atleta: " + data.nombre + " " + data.apellido;
+                    submitButton.textContent = "Actualizar Atleta";
+                    cancelButton.classList.remove('hidden');
 
                 } else {
-                    alert("¡Error! Documento de atleta no encontrado.");
-                    navigateTo('table');
+                    alert("Documento no encontrado.");
                 }
             } catch (error) {
-                console.error("Error al cargar el documento para edición:", error);
-                alert(`Error al cargar datos: ${error.message}`);
-                navigateTo('table');
+                console.error("Error al cargar datos para edición:", error);
+                alert("Error al cargar datos para edición.");
             }
-        };
+        }
+
+        /**
+         * ELIMINA UN ATLETA DE FIRESTORE (NUEVA FUNCIÓN).
+         */
+        window.deleteAthlete = async function(docId, athleteName, event) {
+            event.preventDefault();
+
+            if (!userId || !db) {
+                alert("Error: Usuario no autenticado o base de datos no conectada.");
+                return;
+            }
+
+            const confirmed = confirm(`¿Estás seguro de que quieres eliminar a "${athleteName}"? Esta acción es irreversible.`);
+            
+            if (confirmed) {
+                try {
+                    const athleteDocRef = doc(db, ATHLETES_COLLECTION_NAME, docId);
+                    await deleteDoc(athleteDocRef);
+                    // onSnapshot se encarga de la actualización de la tabla
+                    console.log(`Atleta "${athleteName}" eliminado con éxito.`);
+
+                } catch (error) {
+                    console.error("Error al eliminar el atleta:", error);
+                    alert(`Error al eliminar al atleta. Revisa las Reglas de Seguridad. Error: ${error.message}`);
+                }
+            }
+        }
+
+        /**
+         * Restablece el formulario a su estado inicial de registro.
+         */
+        window.resetForm = function() {
+            athleteForm.reset();
+            document.getElementById('athleteId').value = '';
+            formTitle.textContent = "Registrar Nuevo Atleta";
+            submitButton.textContent = "Guardar Atleta";
+            cancelButton.classList.add('hidden');
+        }
+
+
+        // ====================================================================
+        // === 4. INICIALIZACIÓN Y AUTENTICACIÓN ==============================
+        // ====================================================================
+        
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Usuario logueado
+                userId = user.uid; // Asignar el UID del usuario
+                
+                // Mostrar nombre del club
+                let clubName = localStorage.getItem('currentClub') || 'Club';
+                if (clubName === 'Club Principal' || clubName === 'Club' || !localStorage.getItem('currentClub')) {
+                    clubName = user.email ? user.email.split('@')[0].charAt(0).toUpperCase() + user.email.split('@')[0].slice(1) : 'Club Logueado';
+                    localStorage.setItem('currentClub', clubName);
+                }
+                clubNameDisplay.textContent = clubName;
+
+                // Iniciar la carga de atletas
+                loadAthletes();
+            } else {
+                // Usuario no logueado, redirigir
+                console.log("Sesión no encontrada. Redirigiendo a index.html");
+                window.location.href = 'index.html'; 
+            }
+        });
+
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+                localStorage.removeItem('currentClub'); 
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error("Error al cerrar sesión:", error);
+            }
+        }
+        
     </script>
 
 </body>
