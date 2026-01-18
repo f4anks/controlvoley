@@ -9,7 +9,8 @@
     <meta name="theme-color" content="#001F3F">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
+    <link rel="apple-touch-icon" href="img/icon-192.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <style>
@@ -39,12 +40,12 @@
                 <div class="p-6 bg-white rounded-xl shadow-glow-azul feature-card">
                     <svg xmlns="http://www.w3.org/2000/svg" class="feature-icon h-12 w-12 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     <h3 class="text-xl font-semibold mb-2">Datos Básicos</h3>
-                    <p class="text-gray-600">Acceso Total al Perfil del Atleta y métricas físicas clave.</p>
+                    <p class="text-gray-600">Acceso Total al Perfil del Atleta y métricas físicas.</p>
                 </div>
                 <div class="p-6 bg-white rounded-xl shadow-glow-azul feature-card">
                     <svg xmlns="http://www.w3.org/2000/svg" class="feature-icon h-12 w-12 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-6v6m-4-2v4m-2-4h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                    <h3 class="text-xl font-semibold mb-2">Análisis Estadísticos</h3>
-                    <p class="text-gray-600">Lleva el registro de estadísticas de juego para el desarrollo deportivo.</p>
+                    <h3 class="text-xl font-semibold mb-2">Analisis Estadisticos</h3>
+                    <p class="text-gray-600">Registro de estadísticas de juego y desarrollo deportivo.</p>
                 </div>
             </div>
         </div>
@@ -74,16 +75,17 @@
         import{initializeApp as a}from"https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import{getAuth as b,signInWithEmailAndPassword as c,onAuthStateChanged as d}from"https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         const e={apiKey:"AIzaSyB5RB7mm1j-0gjCNTUEJTkyEqLjyZ3C7ws",authDomain:"datacontrolvoley-ff556.firebaseapp.com",projectId:"datacontrolvoley-ff556",storageBucket:"datacontrolvoley-ff556.firebasestorage.app",messagingSenderId:"516409072606",appId:"1:516409072606:web:132538dba358a077d71b4f"},f=a(e),g=b(f),h=document.getElementById("loginButton"),i=document.getElementById("errorMessage");
-        window.handleLogin=async function(a){a.preventDefault();i.classList.add("hidden");h.disabled=!0;h.textContent="Iniciando...";const b=document.getElementById("email").value,d=document.getElementById("password").value;try{await c(g,b,d);window.location.href="index_menu.html"}catch(a){let b="Credenciales incorrectas.";i.textContent=b;i.classList.remove("hidden")}finally{h.disabled=!1;h.textContent="Iniciar Sesión"}};
+        window.handleLogin=async function(a){a.preventDefault();i.classList.add("hidden");h.disabled=!0;h.textContent="Iniciando...";const b=document.getElementById("email").value,d=document.getElementById("password").value;try{await c(g,b,d);window.location.href="index_menu.html"}catch(a){i.textContent="Credenciales incorrectas.";i.classList.remove("hidden")}finally{h.disabled=!1;h.textContent="Iniciar Sesión"}};
         d(g,a=>{a&&(window.location.href="index_menu.html")});
+        document.addEventListener('contextmenu',a=>a.preventDefault());
     </script>
 
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('Service Worker registrado', reg))
-                .catch(err => console.log('Error al registrar SW', err));
+                .then(reg => console.log('SW registrado'))
+                .catch(err => console.error('Error SW', err));
             });
         }
     </script>
