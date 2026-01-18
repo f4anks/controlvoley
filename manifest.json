@@ -1,8 +1,8 @@
 {
-  "name": "Control Voley Gestión",
+  "name": "Control Voley",
   "short_name": "CtrlVoley",
-  "description": "Sistema de gestión para clubes de Voleibol",
-  "start_url": "index.html",
+  "description": "Sistema de Gestión Deportiva Simplificada",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#f0f8ff",
   "theme_color": "#001F3F",
@@ -12,7 +12,7 @@
       "src": "img/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "img/icon-512.png",
