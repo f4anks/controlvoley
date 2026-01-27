@@ -19,7 +19,7 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                     <div><label class="block text-sm font-medium text-gray-700">Fecha Nacimiento</label><input type="date" id="fNa" required class="mt-1 block w-full border-gray-300 rounded-md p-2 border"></div>
-                    <div><label class="block text-sm font-medium text-gray-700">Categoría</label><select id="cat" required class="mt-1 block w-full border-gray-300 rounded-md p-2 border"><option value="">Seleccione</option><option value="U9">U9</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option><option value="U19">U19</option><option value="Master">Master</option></select></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Categoría</label><select id="cat" required class="mt-1 block w-full border-gray-300 rounded-md p-2 border"><option value="">Seleccione</option><option value="U9">U9</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option><option value="U17">U17</option><option value="U19">U19</option><option value="Master">Master</option></select></div>
                     <div><label class="block text-sm font-medium text-gray-700">Camiseta</label><input type="number" id="nCa" class="mt-1 block w-full border-gray-300 rounded-md p-2 border"></div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -64,3 +64,4 @@ window.eAt=(id)=>{const a=_cA.find(x=>x.id===id);if(!a)return;_a('aId').value=a.
 window.dAt=async(id,n)=>{if(confirm(`¿Eliminar a ${n}?`)){try{await _dD(_do(_db,_0x1a[5],id))}catch(e){alert(e.message)}}};
 window.rFo=()=>{_a('aFo').reset();_a('aId').value='';_a('fTi').textContent='Registrar Nuevo Atleta'};
 window.loG=()=>_sO(_au).then(()=>location.href=_0x1a[7]);</script></body></html>
+
