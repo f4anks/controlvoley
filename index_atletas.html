@@ -1,302 +1,64 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Atletas - Control Voley</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --color-azul-marino: #001F3F;
-            --color-azul-electrico: #0074D9;
-            --color-fondo-claro: #f0f8ff;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--color-fondo-claro);
-        }
-        .azul-marino-bg { background-color: var(--color-azul-marino); }
-        .azul-electrico-text { color: var(--color-azul-electrico); }
-        .rounded-xl { border-radius: 0.75rem; }
-        .shadow-lg-azul { box-shadow: 0 0 20px -5px rgba(0, 31, 63, 0.4); }
-        
-        .banner-header {
-            background-image: url('img/banner.png'); 
-            background-size: cover; 
-            background-position: center; 
-            background-repeat: no-repeat;
-            min-height: 250px; 
-            width: 100%;
-        }
-        .table-header {
-            background-color: var(--color-azul-marino);
-            color: white;
-            text-align: left;
-        }
-    </style>
-</head>
-<body>
-    
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Gestión de Atletas - Control Voley</title><script src="https://cdn.tailwindcss.com"></script><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet"><style>:root{--c1:#001F3F;--c2:#0074D9;--bg:#f0f8ff}body{font-family:'Inter',sans-serif;background-color:var(--bg);-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.azul-marino-bg{background-color:var(--c1)}.azul-electrico-text{color:var(--c2)}.shadow-lg-azul{box-shadow:0 0 20px -5px rgba(0,31,63,0.4)}.banner-header{background-image:url('img/banner.png');background-size:cover;background-position:center;min-height:250px;width:100%}.table-header{background-color:var(--c1);color:white;text-align:left}</style></head><body oncontextmenu="return false">
     <div class="banner-header"></div>
     <div class="container mx-auto p-4 md:p-8">
-        
         <header class="mb-8 flex justify-between items-center border-b pb-4">
-            <a href="index_menu.html" class="text-gray-600 hover:text-azul-electrico transition p-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
-                </svg>
+            <a href="index_menu.html" class="text-gray-600 hover:text-blue-600 transition p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" /></svg>
             </a>
-            
-            <h1 class="text-3xl font-extrabold text-gray-900 mx-auto text-center">
-                Gestión de Atletas
-            </h1>
-
-            <button onclick="logout()" class="py-2 px-4 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-200 shadow-md">
-                Cerrar Sesión
-            </button>
+            <h1 class="text-3xl font-extrabold text-gray-900 mx-auto text-center">Gestión de Atletas</h1>
+            <button onclick="logout()" class="py-2 px-4 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 shadow-md transition">Cerrar Sesión</button>
         </header>
 
         <div class="bg-white p-6 rounded-xl shadow-lg-azul mb-8">
-            <h2 id="formTitle" class="text-2xl font-bold mb-4 text-gray-800 azul-electrico-text">Registrar Nuevo Atleta</h2>
-            <form id="athleteForm" onsubmit="handleFormSubmit(event)">
-                <input type="hidden" id="athleteId" value="">
-                
+            <h2 id="fTi" class="text-2xl font-bold mb-4 azul-electrico-text">Registrar Nuevo Atleta</h2>
+            <form id="aFo" onsubmit="hFS(event)">
+                <input type="hidden" id="aId" value="">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Nombre(s)</label>
-                        <input type="text" id="nombre" required placeholder="Ej: Juan José" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Apellido(s)</label>
-                        <input type="text" id="apellido" required placeholder="Ej: Pérez Castro" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Cédula de Identidad</label>
-                        <input type="number" id="cedulaIdentidad" required placeholder="Ej: 32445122" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Teléfono</label>
-                        <input type="number" id="telefono" required placeholder="Ej: 04245451211" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
-                    </div>
+                    <div><label class="block text-sm font-medium text-gray-700">Nombre(s)</label><input type="text" id="nom" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500"></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Apellido(s)</label><input type="text" id="ape" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500"></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Cédula</label><input type="number" id="ced" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500"></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Teléfono</label><input type="number" id="tel" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500"></div>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Fecha Nacimiento</label>
-                        <input type="date" id="fechaNacimiento" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Categoría</label>
-                        <select id="categoria" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
-                            <option value="" disabled selected>Seleccione</option>
-                            <option value="U9">U9</option><option value="U11">U11</option><option value="U13">U13</option>
-                            <option value="U15">U15</option><option value="U19">U19</option><option value="Master">Master</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Nro Camiseta</label>
-                        <input type="number" id="nroCamiseta" min="0" max="99" placeholder="00" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
-                    </div>
+                    <div><label class="block text-sm font-medium text-gray-700">Fecha Nacimiento</label><input type="date" id="fNa" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border"></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Categoría</label><select id="cat" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border"><option value="">Seleccione</option><option value="U9">U9</option><option value="U11">U11</option><option value="U13">U13</option><option value="U15">U15</option><option value="U19">U19</option><option value="Master">Master</option></select></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Nro Camiseta</label><input type="number" id="nCa" min="0" max="99" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border"></div>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Peso (kg) <span class="text-xs text-gray-400">(Opcional)</span></label>
-                        <input type="number" id="peso" step="0.01" placeholder="Ej: 50.30" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Talla (cm) <span class="text-xs text-gray-400">(Sin decimales)</span></label>
-                        <input type="number" id="talla" step="1" oninput="this.value = Math.floor(this.value)" placeholder="Ej: 162" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
-                    </div>
-                </div>
-                
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Estatus</label>
-                        <select id="tipoNomina" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
-                            <option value="activo">Activo</option><option value="reposo">Reposo</option><option value="suspendido">Suspendido</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Frecuencia Pago</label>
-                        <select id="frecuenciaPago" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
-                            <option value="mensual">Mensual</option><option value="quincenal">Quincenal</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Monto Nómina</label>
-                        <input type="number" id="montoPago" step="0.01" required placeholder="0.00" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Último Pago</label>
-                        <input type="date" id="fechaUltimoPago" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-azul-electrico">
-                    </div>
+                    <div><label class="block text-sm font-medium text-gray-700">Estatus</label><select id="tNo" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border"><option value="activo">Activo</option><option value="reposo">Reposo</option><option value="suspendido">Suspendido</option></select></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Frecuencia Pago</label><select id="fPa" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border"><option value="mensual">Mensual</option><option value="quincenal">Quincenal</option></select></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Monto Nómina</label><input type="number" id="mPa" step="0.01" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border"></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Último Pago</label><input type="date" id="fUP" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border"></div>
                 </div>
-                
                 <div class="flex space-x-4 mt-6">
-                    <button type="submit" class="py-2 px-4 azul-marino-bg text-white font-semibold rounded-lg shadow-md hover:bg-blue-900 transition duration-200">Guardar Atleta</button>
-                    <button type="button" onclick="resetForm()" class="py-2 px-4 bg-gray-300 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-400 transition duration-200">Nuevo / Cancelar</button>
+                    <button type="submit" class="py-2 px-4 azul-marino-bg text-white font-semibold rounded-lg shadow-md hover:bg-blue-900 transition">Guardar Atleta</button>
+                    <button type="button" onclick="rFo()" class="py-2 px-4 bg-gray-300 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-400 transition">Cancelar</button>
                 </div>
             </form>
         </div>
 
         <div class="bg-white p-6 rounded-xl shadow-lg-azul overflow-x-auto">
-            <h2 class="text-2xl font-bold mb-4 text-gray-800">Nómina del Club</h2>
+            <h2 class="text-2xl font-bold mb-4">Nómina del Club</h2>
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="table-header">
-                    <tr>
-                        <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider">Nombre</th>
-                        <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider">Cédula</th>
-                        <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider">Cat.</th>
-                        <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider">Estatus</th>
-                        <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider">Frecuencia</th>
-                        <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider">Solvencia</th>
-                        <th class="px-6 py-3 text-xs font-medium uppercase tracking-wider">Acciones</th>
-                    </tr>
+                    <tr><th class="px-6 py-3 text-xs uppercase">Nombre</th><th class="px-6 py-3 text-xs uppercase">Cédula</th><th class="px-6 py-3 text-xs uppercase">Cat.</th><th class="px-6 py-3 text-xs uppercase">Estatus</th><th class="px-6 py-3 text-xs uppercase">Frecuencia</th><th class="px-6 py-3 text-xs uppercase">Solvencia</th><th class="px-6 py-3 text-xs uppercase">Acciones</th></tr>
                 </thead>
-                <tbody id="athletesTableBody" class="bg-white divide-y divide-gray-200">
-                    <tr><td colspan="7" class="px-6 py-4 text-center text-gray-500" id="loadingRow">Cargando atletas...</td></tr>
+                <tbody id="aTB" class="bg-white divide-y divide-gray-200">
+                    <tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">Cargando...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <script type="module">
-        const ATHLETES_COLLECTION_NAME = 'club_athletes';
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, onSnapshot, addDoc, updateDoc, deleteDoc, query, where, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"; 
-        
-        const firebaseConfig = { 
-            apiKey: "AIzaSyB5RB7mm1j-0gjCNTUEJTkyEqLjyZ3C7ws",
-            authDomain: "datacontrolvoley-ff556.firebaseapp.com",
-            projectId: "datacontrolvoley-ff556",
-            storageBucket: "datacontrolvoley-ff556.firebasestorage.app",
-            messagingSenderId: "516409072606",
-            appId: "1:516409072606:web:132538dba358a077d71b4f" 
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let teamId = null;
-        let currentAthletes = []; 
-
-        async function getTeamId(uid) {
-            try {
-                const docSnap = await getDoc(doc(db, "users", uid));
-                return docSnap.exists() ? docSnap.data().teamId : null;
-            } catch (e) { return null; }
-        }
-
-        function calculateSolvencyStatus(fecha, frecuencia) {
-            if (!fecha) return { status: 'Insolvente', class: 'bg-red-100 text-red-800' };
-            const diffDays = Math.round((new Date() - new Date(fecha)) / (1000 * 60 * 60 * 24));
-            const limit = frecuencia === 'quincenal' ? 15 : 30;
-            return diffDays <= limit ? { status: 'Solvente', class: 'bg-green-100 text-green-800' } : { status: 'Insolvente', class: 'bg-yellow-100 text-yellow-800' };
-        }
-
-        function renderAthletesTable(athletes) {
-            const tbody = document.getElementById('athletesTableBody');
-            tbody.innerHTML = athletes.length ? '' : '<tr><td colspan="7" class="px-6 py-4 text-center">Sin registros.</td></tr>';
-            athletes.forEach(a => {
-                const s = calculateSolvencyStatus(a.fechaUltimoPago, a.frecuenciaPago);
-                tbody.insertAdjacentHTML('beforeend', `
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="px-6 py-4">${a.nombre} ${a.apellido}</td>
-                        <td class="px-6 py-4">${a.cedulaIdentidad}</td>
-                        <td class="px-6 py-4">${a.categoria}</td>
-                        <td class="px-6 py-4"><span class="px-2 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">${a.tipoNomina}</span></td>
-                        <td class="px-6 py-4 uppercase text-xs font-bold">${a.frecuenciaPago || 'mensual'}</td>
-                        <td class="px-6 py-4"><span class="px-2 text-xs font-semibold rounded-full ${s.class}">${s.status}</span></td>
-                        <td class="px-6 py-4 text-sm font-medium space-x-2">
-                            <button onclick="editAthlete('${a.id}')" class="text-indigo-600 hover:underline">Editar</button>
-                            <button onclick="deleteAthlete('${a.id}', '${a.nombre}')" class="text-red-600 hover:underline">Eliminar</button>
-                        </td>
-                    </tr>`);
-            });
-        }
-
-        window.handleFormSubmit = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('athleteId').value;
-            const data = {
-                nombre: document.getElementById('nombre').value.trim(),
-                apellido: document.getElementById('apellido').value.trim(),
-                cedulaIdentidad: document.getElementById('cedulaIdentidad').value.trim(),
-                telefono: document.getElementById('telefono').value,
-                fechaNacimiento: document.getElementById('fechaNacimiento').value,
-                categoria: document.getElementById('categoria').value,
-                nroCamiseta: parseInt(document.getElementById('nroCamiseta').value) || 0,
-                peso: parseFloat(document.getElementById('peso').value) || null,
-                talla: parseInt(document.getElementById('talla').value) || null,
-                tipoNomina: document.getElementById('tipoNomina').value,
-                frecuenciaPago: document.getElementById('frecuenciaPago').value,
-                montoPago: parseFloat(document.getElementById('montoPago').value) || 0,
-                fechaUltimoPago: document.getElementById('fechaUltimoPago').value,
-                clubId: teamId,
-                updatedAt: new Date().toISOString()
-            };
-            try {
-                id ? await updateDoc(doc(db, ATHLETES_COLLECTION_NAME, id), data) : await addDoc(collection(db, ATHLETES_COLLECTION_NAME), {...data, createdAt: new Date().toISOString()});
-                alert('Datos guardados exitosamente'); 
-                resetForm();
-            } catch (err) { alert(err.message); }
-        };
-
-        window.editAthlete = (id) => {
-            const a = currentAthletes.find(x => x.id === id);
-            if (!a) return;
-            document.getElementById('athleteId').value = a.id;
-            document.getElementById('nombre').value = a.nombre;
-            document.getElementById('apellido').value = a.apellido;
-            document.getElementById('cedulaIdentidad').value = a.cedulaIdentidad;
-            document.getElementById('telefono').value = a.telefono || '';
-            document.getElementById('fechaNacimiento').value = a.fechaNacimiento;
-            document.getElementById('categoria').value = a.categoria;
-            document.getElementById('nroCamiseta').value = a.nroCamiseta;
-            document.getElementById('peso').value = a.peso || '';
-            document.getElementById('talla').value = a.talla || '';
-            document.getElementById('tipoNomina').value = a.tipoNomina;
-            document.getElementById('frecuenciaPago').value = a.frecuenciaPago;
-            document.getElementById('montoPago').value = a.montoPago;
-            document.getElementById('fechaUltimoPago').value = a.fechaUltimoPago || '';
-            document.getElementById('formTitle').textContent = 'Editar Atleta';
-            window.scrollTo(0,0);
-        };
-
-        window.deleteAthlete = async (id, nombre) => {
-            if (confirm(`¿Está seguro de eliminar al atleta ${nombre}?`)) {
-                try {
-                    await deleteDoc(doc(db, ATHLETES_COLLECTION_NAME, id));
-                } catch (e) {
-                    alert("Error al eliminar: " + e.message);
-                }
-            }
-        };
-
-        window.resetForm = () => {
-            document.getElementById('athleteForm').reset();
-            document.getElementById('athleteId').value = '';
-            document.getElementById('formTitle').textContent = 'Registrar Nuevo Atleta';
-        };
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                teamId = await getTeamId(user.uid);
-                if (teamId) {
-                    onSnapshot(query(collection(db, ATHLETES_COLLECTION_NAME), where("clubId", "==", teamId)), (snap) => {
-                        currentAthletes = snap.docs.map(d => ({id: d.id, ...d.data()}));
-                        renderAthletesTable(currentAthletes);
-                    });
-                }
-            } else { window.location.href = 'index.html'; }
-        });
-
-        window.logout = () => signOut(auth).then(() => window.location.href = 'index.html');
-    </script>
-</body>
-</html>
+<script type="module">
+window.addEventListener('keydown',function(e){if(e.keyCode==123||(e.ctrlKey&&e.shiftKey&&(e.keyCode==73||e.keyCode==74||e.keyCode==67))||(e.ctrlKey&&e.keyCode==85)){e.preventDefault();return false;}});
+import{initializeApp as _0x1}from"https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";import{getAuth as _0x2,onAuthStateChanged as _0x3,signOut as _0x4}from"https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";import{getFirestore as _0x5,collection as _0x6,doc as _0x7,onSnapshot as _0x8,addDoc as _0x9,updateDoc as _0x10,deleteDoc as _0x11,query as _0x12,where as _0x13,getDoc as _0x14}from"https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+const _0x0=['\x63\x6c\x75\x62\x5f\x61\x74\x68\x6c\x65\x74\x65\x73','\x75\x73\x65\x72\x73','\x69\x6e\x64\x65\x78\x2e\x68\x74\x6d\x6c','\x63\x6c\x75\x62\x49\x64'];
+const _0xa=i=>document.getElementById(i);let _tD=null;let _cA=[];
+const _0xb=(_f)=>{const a=_0x1({apiKey:"AIzaSyB5RB7mm1j-0gjCNTUEJTkyEqLjyZ3C7ws",authDomain:"datacontrolvoley-ff556.firebaseapp.com",projectId:"datacontrolvoley-ff556",storageBucket:"datacontrolvoley-ff556.firebasestorage.app",messagingSenderId:"516409072606",appId:"1:516409072606:web:132538dba358a077d71b4f"}),s=_0x2(a),r=_0x5(a);_0x3(s,async(u)=>{if(u){const d=await _0x14(_0x7(r,_0x0[1],u.uid));_tD=d.exists()?d.data().teamId:null;if(_tD){_0x8(_0x12(_0x6(r,_0x0[0]),_0x13(_0x0[3],"==",_tD)),(sn)=>{_cA=sn.docs.map(x=>({id:x.id,...x.data()}));_rT(_cA)})}else{_0x4(s);location.href=_0x0[2]}}else{location.href=_0x0[2]}});
+function _rT(p){const b=_0xa('aTB');b.innerHTML=p.length?'':'<tr><td colspan="7" class="px-6 py-4 text-center">Sin registros.</td></tr>';p.forEach(a=>{const d=Math.round((new Date()-new Date(a.fechaUltimoPago))/(864e5)),l=a.frecuenciaPago==='quincenal'?15:30,v=d<=l;b.insertAdjacentHTML('beforeend',`<tr class="hover:bg-gray-50 transition"><td class="px-6 py-4">${a.nombre} ${a.apellido}</td><td class="px-6 py-4">${a.cedulaIdentidad}</td><td class="px-6 py-4">${a.categoria}</td><td class="px-6 py-4"><span class="px-2 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">${a.tipoNomina}</span></td><td class="px-6 py-4 uppercase text-xs font-bold">${a.frecuenciaPago}</td><td class="px-6 py-4"><span class="px-2 text-xs font-semibold rounded-full ${v?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">${v?'Solvente':'Insolvente'}</span></td><td class="px-6 py-4 text-sm space-x-2"><button onclick="eAt('${a.id}')" class="text-indigo-600">Editar</button><button onclick="dAt('${a.id}','${a.nombre}')" class="text-red-600">Eliminar</button></td></tr>`)})}
+window.hFS=async(e)=>{e.preventDefault();const id=_0xa('aId').value,dt={nombre:_0xa('nom').value,apellido:_0xa('ape').value,cedulaIdentidad:_0xa('ced').value,telefono:_0xa('tel').value,fechaNacimiento:_0xa('fNa').value,categoria:_0xa('cat').value,nroCamiseta:parseInt(_0xa('nCa').value)||0,tipoNomina:_0xa('tNo').value,frecuenciaPago:_0xa('fPa').value,montoPago:parseFloat(_0xa('mPa').value)||0,fechaUltimoPago:_0xa('fUP').value,clubId:_tD,updatedAt:new Date().toISOString()};try{id?await _0x10(_0x7(r,_0x0[0],id),dt):await _0x9(_0x6(r,_0x0[0]),{...dt,createdAt:new Date().toISOString()});alert('Éxito');rFo()}catch(x){alert(x.message)}};
+window.eAt=(id)=>{const a=_cA.find(x=>x.id===id);if(!a)return;_0xa('aId').value=a.id;_0xa('nom').value=a.nombre;_0xa('ape').value=a.apellido;_0xa('ced').value=a.cedulaIdentidad;_0xa('tel').value=a.telefono||'';_0xa('fNa').value=a.fechaNacimiento;_0xa('cat').value=a.categoria;_0xa('nCa').value=a.nroCamiseta;_0xa('tNo').value=a.tipoNomina;_0xa('fPa').value=a.frecuenciaPago;_0xa('mPa').value=a.montoPago;_0xa('fUP').value=a.fechaUltimoPago||'';_0xa('fTi').textContent='Editar Atleta';window.scrollTo(0,0)};
+window.dAt=async(id,n)=>{if(confirm(`¿Eliminar a ${n}?`)){try{await _0x11(_0x7(r,_0x0[0],id))}catch(e){alert(e.message)}}};
+window.rFo=()=>{_0xa('aFo').reset();_0xa('aId').value='';_0xa('fTi').textContent='Registrar Nuevo Atleta'};
+window.logout=()=>_0x4(s).then(()=>location.href=_0x0[2])};_0xb();</script></body></html>
